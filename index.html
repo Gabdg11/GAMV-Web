@@ -13,103 +13,75 @@
             display: flex; flex-direction: column;
         }
 
-        /* 1. TOP NAVIGATION (Inline & Kompak) */
+        /* 1. TOP NAVIGATION */
         .top-nav {
-            background: #ffffff;
-            border-bottom: 1px solid #dee2e6;
-            padding: 10px 15px;
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            flex-shrink: 0; /* Agar tidak terlipat */
+            background: #ffffff; border-bottom: 1px solid #dee2e6;
+            padding: 10px 15px; display: flex; gap: 10px;
+            overflow-x: auto; white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); flex-shrink: 0;
         }
         .nav-btn {
-            background: #fff;
-            border: 1px solid #ced4da;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            color: #495057;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            background: #fff; border: 1px solid #ced4da; padding: 6px 12px;
+            border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
+            color: #495057; transition: 0.2s; display: flex; align-items: center; gap: 5px;
         }
         .nav-btn:hover { background: #e2e6ea; }
         .nav-btn.active { background: #007bff; color: white; border-color: #007bff; }
 
-        /* 2. TOOLBAR (Filter & Pencarian) */
+        /* 2. TOOLBAR */
         .toolbar {
-            padding: 10px 15px;
-            background: #ffffff;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-            flex-shrink: 0;
+            padding: 10px 15px; background: #ffffff; border-bottom: 1px solid #dee2e6;
+            display: flex; gap: 15px; flex-wrap: wrap; align-items: center; flex-shrink: 0;
         }
         .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: bold; }
         .toolbar input {
-            padding: 6px 10px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 13px;
-            outline: none;
+            padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px;
+            font-size: 13px; outline: none;
         }
         .toolbar input:focus { border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.25); }
         .search-box { flex-grow: 1; max-width: 300px; }
+        
+        .btn-print {
+            background: #28a745; color: white; border: none; padding: 7px 15px;
+            border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;
+            margin-left: auto; display: flex; align-items: center; gap: 5px;
+        }
+        .btn-print:hover { background: #218838; }
 
-        /* 3. AREA TABEL (Full Screen & Scrollable ala Excel) */
+        /* 3. AREA TABEL */
         .table-container {
-            flex-grow: 1; /* Mengisi sisa layar penuh */
-            overflow: auto; /* Bisa scroll atas bawah & kanan kiri */
-            background: #ffffff;
-            position: relative;
+            flex-grow: 1; overflow: auto; background: #ffffff; position: relative;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            white-space: nowrap; /* Teks tidak akan turun ke bawah, memanjang seperti Excel */
-        }
-        th, td {
-            padding: 10px 15px;
-            border: 1px solid #dee2e6;
-            font-size: 13px;
-            text-align: left;
-        }
-        /* Efek Freeze Panes (Sticky Header) */
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 8px 12px; border: 1px solid #dee2e6; font-size: 13px; text-align: left; }
+        
+        /* Header Sticky & Filter Kolom */
         th {
-            background-color: #e9ecef;
-            color: #212529;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            background-color: #e9ecef; color: #212529; position: sticky; top: 0;
+            z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.1); vertical-align: bottom;
         }
-        tr:hover td { background-color: #f1f7fd; } /* Highlight baris saat disentuh mouse */
+        .col-filter-input {
+            width: 100%; box-sizing: border-box; padding: 4px; margin-top: 5px;
+            border: 1px solid #ced4da; border-radius: 3px; font-size: 11px;
+            font-weight: normal; outline: none;
+        }
+        .col-filter-input:focus { border-color: #007bff; }
+        
+        tr:hover td { background-color: #f1f7fd; }
+        tr.selected td { background-color: #e8f4ff; } /* Highlight baris tercentang */
 
-        /* Tombol Link/File */
         .btn-link {
             display: inline-block; background: #17a2b8; color: white; padding: 4px 8px;
             border-radius: 3px; text-decoration: none; font-size: 11px; font-weight: bold;
         }
         .btn-link:hover { background: #138496; }
 
-        /* Status & Loader */
         .status-msg { padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
         .spinner { width: 24px; height: 24px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Responsif Kecil */
-        @media screen and (max-width: 768px) {
-            .search-box { max-width: 100%; }
-            .toolbar { flex-direction: column; align-items: stretch; }
-        }
+        /* Checkbox styling */
+        .chk-box { cursor: pointer; width: 16px; height: 16px; }
     </style>
 </head>
 <body>
@@ -124,11 +96,11 @@
         <button class="nav-btn" onclick="tarikData('Pengambilan Barang (Office Supplies)', this)">📦 Supplies</button>
     </nav>
 
-    <!-- 2. TOOLBAR FILTERING -->
+    <!-- 2. TOOLBAR FILTERING & PRINT -->
     <div class="toolbar" id="toolbar" style="display: none;">
         <div class="filter-group">
-            <label>Cari:</label>
-            <input type="text" id="searchInput" class="search-box" placeholder="Ketik kata kunci apa saja..." oninput="terapkanFilter()">
+            <label>Pencarian Global:</label>
+            <input type="text" id="searchInput" class="search-box" placeholder="Ketik kata kunci..." oninput="terapkanFilter()">
         </div>
         <div class="filter-group">
             <label>Tgl Mulai:</label>
@@ -138,7 +110,10 @@
             <label>Tgl Akhir:</label>
             <input type="date" id="dateEnd" onchange="terapkanFilter()">
         </div>
-        <span id="rowCount" style="font-size: 12px; color: #666; margin-left: auto;"></span>
+        
+        <span id="rowCount" style="font-size: 12px; color: #666; margin-left: 15px;"></span>
+        
+        <button class="btn-print" onclick="cetakData()">🖨️ Cetak Terpilih</button>
     </div>
 
     <!-- 3. AREA TABEL DATA -->
@@ -152,23 +127,22 @@
     // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
     const URL_API = "https://script.google.com/macros/s/AKfycbwqEhqsjNtqzey6-neYyg4Bu1F3K95r4Fm4s7_QP-VFs4W5snC1yK1ML6i2gGZgvTq_/exec";
 
-    // Variabel Global untuk menyimpan data mentah, agar filter bisa cepat tanpa loading API lagi
     let globalHeaders = [];
     let globalRows = [];
+    let currentModule = "";
 
     async function tarikData(sourceName, elemenDiklik) {
-        // Atur UI Tombol Aktif
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
         elemenDiklik.classList.add('active');
+        currentModule = sourceName;
 
         const tableContainer = document.getElementById("tableContainer");
         const toolbar = document.getElementById("toolbar");
         
-        // Sembunyikan toolbar dulu, tampilkan loading
         toolbar.style.display = "none";
         tableContainer.innerHTML = `<div class="status-msg"><div class="spinner"></div> Mengambil data ${sourceName}...</div>`;
 
-        // Reset input filter
+        // Reset semua filter
         document.getElementById('searchInput').value = '';
         document.getElementById('dateStart').value = '';
         document.getElementById('dateEnd').value = '';
@@ -187,49 +161,55 @@
                 return;
             }
 
-            // Simpan ke variabel global
             globalHeaders = data.headers;
             globalRows = data.rows;
 
-            // Tampilkan Toolbar & Render Tabel
             toolbar.style.display = "flex";
-            renderTabel(globalRows);
+            renderTabel(globalHeaders, globalRows);
+            document.getElementById('rowCount').innerText = `Tampil: ${globalRows.length} baris`;
 
         } catch (error) {
             tableContainer.innerHTML = `<div class="status-msg" style="color:red;">Gagal terhubung ke server/API.</div>`;
         }
     }
 
-    // Fungsi menggambar tabel ke HTML
-    function renderTabel(barisData) {
+    function renderTabel(headers, barisData) {
         const tableContainer = document.getElementById("tableContainer");
         
-        if (barisData.length === 0) {
-            tableContainer.innerHTML = `<div class="status-msg">Tidak ada data yang cocok dengan filter.</div>`;
-            document.getElementById('rowCount').innerText = "0 baris";
-            return;
-        }
-
         let html = `<table><thead><tr>`;
-        globalHeaders.forEach(header => { html += `<th>${header}</th>`; });
-        html += `</tr></thead><tbody>`;
+        
+        // Checkbox Master (Pilih Semua)
+        html += `<th style="width: 30px; text-align: center;">
+                    <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)">
+                 </th>`;
+        
+        // Header & Input Filter Kolom
+        headers.forEach((header, index) => { 
+            html += `<th>
+                        <div style="margin-bottom: 4px;">${header}</div>
+                        <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter..." oninput="terapkanFilter()">
+                     </th>`; 
+        });
+        html += `</tr></thead><tbody id="tabelBody">`;
 
-        barisData.forEach(row => {
-            html += `<tr>`;
+        // Render Baris
+        barisData.forEach((row, originalIndex) => {
+            html += `<tr id="row_${originalIndex}">`;
+            
+            // Checkbox Baris
+            html += `<td style="text-align: center;">
+                        <input type="checkbox" class="chk-box row-chk" onchange="highlightRow(this)">
+                     </td>`;
+                     
             row.forEach(cell => {
                 let isiSel = cell !== undefined && cell !== null ? cell : '';
-                
-                // Cek Link File Drive
                 if (typeof isiSel === 'string' && (isiSel.startsWith('http://') || isiSel.startsWith('https://'))) {
                     isiSel = `<a href="${isiSel}" target="_blank" class="btn-link">Buka Berkas ↗</a>`;
                 }
-                
-                // Format Tanggal (Opsional)
                 if (typeof isiSel === 'string' && isiSel.match(/^\d{4}-\d{2}-\d{2}T/)) {
                     let dateObj = new Date(isiSel);
                     isiSel = dateObj.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
                 }
-
                 html += `<td>${isiSel}</td>`;
             });
             html += `</tr>`;
@@ -237,43 +217,167 @@
 
         html += `</tbody></table>`;
         tableContainer.innerHTML = html;
-        document.getElementById('rowCount').innerText = `Total: ${barisData.length} baris`;
     }
 
-    // Fungsi Filter Data (Pencarian Teks & Range Tanggal)
+    // Fungsi Checklist Highlight
+    function highlightRow(checkbox) {
+        let tr = checkbox.closest('tr');
+        if (checkbox.checked) {
+            tr.classList.add('selected');
+        } else {
+            tr.classList.remove('selected');
+        }
+    }
+
+    function toggleCheckAll(masterCheckbox) {
+        // Hanya centang baris yang sedang TAMPIL (tidak ter-filter)
+        let visibleRows = document.querySelectorAll('#tabelBody tr:not([style*="display: none"])');
+        visibleRows.forEach(tr => {
+            let chk = tr.querySelector('.row-chk');
+            chk.checked = masterCheckbox.checked;
+            highlightRow(chk);
+        });
+    }
+
+    // Fungsi Filter Data (Menggunakan teknik DOM Hiding agar checkbox tidak hilang saat ngetik)
     function terapkanFilter() {
-        let kataKunci = document.getElementById('searchInput').value.toLowerCase();
+        let globalCari = document.getElementById('searchInput').value.toLowerCase();
         let dateStart = document.getElementById('dateStart').value;
         let dateEnd = document.getElementById('dateEnd').value;
-
-        // Ubah input tanggal ke object Date untuk perbandingan (jika diisi)
+        
         let dStart = dateStart ? new Date(dateStart) : null;
         let dEnd = dateEnd ? new Date(dateEnd) : null;
         if (dStart) dStart.setHours(0, 0, 0, 0);
-        if (dEnd) dEnd.setHours(23, 59, 59, 999); // Akhir hari
+        if (dEnd) dEnd.setHours(23, 59, 59, 999);
 
-        let hasilFilter = globalRows.filter(row => {
-            // 1. Cek Pencarian Teks (Cari di semua kolom)
-            let teksBaris = row.join(" ").toLowerCase();
-            let lolosTeks = teksBaris.includes(kataKunci);
+        // Ambil semua input filter kolom
+        let colFilters = Array.from(document.querySelectorAll('.col-filter-input')).map(input => {
+            return { index: parseInt(input.getAttribute('data-colindex')), keyword: input.value.toLowerCase() };
+        }).filter(f => f.keyword !== ""); // Hanya ambil yang diketik sesuatu
 
-            // 2. Cek Filter Tanggal 
-            // (Asumsi kolom pertama [index 0] di Spreadsheet kamu adalah "Timestamp" / Tanggal)
-            let lolosTanggal = true;
+        let trs = document.querySelectorAll('#tabelBody tr');
+        let countVisible = 0;
+
+        trs.forEach((tr, index) => {
+            let rowData = globalRows[index]; // Ambil data murni sesuai urutan render
+            let teksBaris = rowData.join(" ").toLowerCase();
+            
+            // 1. Cek Global Search
+            let lolosGlobal = teksBaris.includes(globalCari);
+
+            // 2. Cek Date (Asumsi kolom pertama adalah Timestamp)
+            let lolosTgl = true;
             if (dStart || dEnd) {
-                let cellTanggal = new Date(row[0]); 
-                // Jika baris tersebut format tanggalnya valid
+                let cellTanggal = new Date(rowData[0]); 
                 if (!isNaN(cellTanggal.getTime())) {
-                    if (dStart && cellTanggal < dStart) lolosTanggal = false;
-                    if (dEnd && cellTanggal > dEnd) lolosTanggal = false;
+                    if (dStart && cellTanggal < dStart) lolosTgl = false;
+                    if (dEnd && cellTanggal > dEnd) lolosTgl = false;
                 }
             }
 
-            return lolosTeks && lolosTanggal;
+            // 3. Cek Filter Kolom Spesifik
+            let lolosCol = true;
+            for (let f of colFilters) {
+                let cellData = rowData[f.index] !== undefined && rowData[f.index] !== null ? String(rowData[f.index]).toLowerCase() : "";
+                if (!cellData.includes(f.keyword)) {
+                    lolosCol = false;
+                    break;
+                }
+            }
+
+            // Terapkan hasil: Sembunyikan atau Tampilkan Baris
+            if (lolosGlobal && lolosTgl && lolosCol) {
+                tr.style.display = "";
+                countVisible++;
+            } else {
+                tr.style.display = "none";
+                // Otomatis uncheck baris yang disembunyikan agar tidak ikut ke-print
+                let chk = tr.querySelector('.row-chk');
+                if(chk.checked) {
+                    chk.checked = false;
+                    highlightRow(chk);
+                }
+            }
+        });
+        
+        document.getElementById('rowCount').innerText = `Tampil: ${countVisible} baris`;
+        document.getElementById('chkAll').checked = false; // Reset master checkbox
+    }
+
+    // Fungsi Cetak (Print) Baris yang di-checklist
+    function cetakData() {
+        let checkedBoxes = document.querySelectorAll('.row-chk:checked');
+        if (checkedBoxes.length === 0) {
+            return alert("Silakan centang minimal satu baris data yang ingin dicetak.");
+        }
+
+        let printWindow = window.open('', '_blank');
+        
+        // Buat struktur HTML khusus untuk halaman Print
+        let printHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Cetak Data - ${currentModule}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; font-size: 11px; color: #333; padding: 20px; }
+                    h2 { text-align: center; color: #000; margin-bottom: 5px; }
+                    .print-date { text-align: center; margin-bottom: 20px; color: #555; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                    th, td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: top; }
+                    th { background-color: #f2f2f2; font-weight: bold; }
+                    @media print {
+                        @page { size: landscape; margin: 10mm; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h2>Laporan Operasional</h2>
+                <div class="print-date">Modul: <strong>${currentModule}</strong> | Dicetak pada: ${new Date().toLocaleString('id-ID')}</div>
+                <table>
+                    <thead><tr>
+        `;
+
+        // Tambahkan Header (tanpa kolom checkbox)
+        globalHeaders.forEach(h => {
+            printHtml += `<th>${h}</th>`;
+        });
+        printHtml += `</tr></thead><tbody>`;
+
+        // Tambahkan Data Baris yang tercentang (tanpa kolom checkbox)
+        checkedBoxes.forEach(chk => {
+            let tr = chk.closest('tr');
+            printHtml += `<tr>`;
+            
+            // Loop sel tabel dimulai dari index 1 (melewati checkbox di index 0)
+            for (let i = 1; i < tr.cells.length; i++) {
+                let cellContent = tr.cells[i].innerHTML;
+                
+                // Bersihkan tombol link agar tidak aneh saat diprint, ubah jadi teks URL mentahnya saja
+                if(cellContent.includes('<a href=')) {
+                    let hrefMatch = cellContent.match(/href="([^"]*)"/);
+                    if(hrefMatch && hrefMatch[1]) {
+                        cellContent = `<span style="word-break: break-all; color: blue;">${hrefMatch[1]}</span>`;
+                    }
+                }
+                
+                printHtml += `<td>${cellContent}</td>`;
+            }
+            printHtml += `</tr>`;
         });
 
-        // Gambar ulang tabel dengan data yang sudah disaring
-        renderTabel(hasilFilter);
+        printHtml += `
+                    </tbody>
+                </table>
+                <script>
+                    window.onload = function() { window.print(); };
+                <\/script>
+            </body>
+            </html>
+        `;
+
+        printWindow.document.write(printHtml);
+        printWindow.document.close();
     }
 </script>
 

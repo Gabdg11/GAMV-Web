@@ -74,9 +74,13 @@
             flex-grow: 1; overflow: auto; background: #ffffff; position: relative;
         }
         table { width: 100%; border-collapse: separate; border-spacing: 0; white-space: nowrap; }
+        
+        /* PERBAIKAN: Penambahan overflow hidden dan text-overflow agar kolom bisa menyusut */
         th, td { 
             padding: 10px 15px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;
             font-size: 13px; text-align: left; 
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         /* Sticky Header Profesional */
@@ -257,17 +261,31 @@
         html += `</tbody></table>`;
         tableContainer.innerHTML = html;
 
-        // Inisiasi Fitur Resizable Columns (Drag untuk Lebarkan Kolom)
+        // Inisiasi Fitur Resizable Columns
         initResizableColumns();
     }
 
     // ==========================================
-    // SCRIPT KHUSUS RESIZABLE COLUMNS
+    // SCRIPT KHUSUS RESIZABLE COLUMNS (VERSI SEMPURNA)
     // ==========================================
     function initResizableColumns() {
+        const table = document.querySelector('table');
         const cols = document.querySelectorAll('th');
+        
+        // 1. Trik: Kunci lebar aktual setiap kolom sesaat setelah data dimuat
         cols.forEach(col => {
-            // Buat elemen handler (garis tak terlihat di ujung kanan kolom)
+            col.style.width = `${col.offsetWidth}px`;
+        });
+        
+        // 2. Ubah mode tabel jadi 'fixed' supaya kolom pasrah saat di-resize script
+        table.style.tableLayout = 'fixed';
+        
+        // 3. Biarkan tabel bebas melebar (horizontal scroll) kalau kolom ditarik
+        table.style.width = 'max-content'; 
+        table.style.minWidth = '100%';
+
+        cols.forEach(col => {
+            // Buat elemen handler di ujung kanan kolom
             const resizer = document.createElement('div');
             resizer.classList.add('resizer');
             col.appendChild(resizer);
@@ -276,9 +294,11 @@
             let w = 0;
 
             const mouseDownHandler = function (e) {
+                // Matikan blok teks agar layar tidak tersorot biru saat kursor digeser
+                document.body.style.userSelect = 'none';
+                
                 x = e.clientX;
-                const styles = window.getComputedStyle(col);
-                w = parseInt(styles.width, 10);
+                w = col.offsetWidth;
 
                 document.addEventListener('mousemove', mouseMoveHandler);
                 document.addEventListener('mouseup', mouseUpHandler);
@@ -287,10 +307,17 @@
 
             const mouseMoveHandler = function (e) {
                 const dx = e.clientX - x;
-                col.style.width = `${w + dx}px`;
+                let newWidth = w + dx;
+                
+                // Batas minimal lebar kolom (60px) supaya elemen checkbox/filter tidak hilang
+                if (newWidth < 60) newWidth = 60; 
+
+                col.style.width = `${newWidth}px`;
             };
 
             const mouseUpHandler = function () {
+                // Kembalikan fungsi seleksi teks seperti semula
+                document.body.style.userSelect = ''; 
                 document.removeEventListener('mousemove', mouseMoveHandler);
                 document.removeEventListener('mouseup', mouseUpHandler);
                 resizer.classList.remove('resizing');

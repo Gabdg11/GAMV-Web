@@ -5,185 +5,275 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Operasional System</title>
     <style>
-        /* Menggunakan gaya dasar dari referensimu */
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; padding: 20px; color: #333; margin: 0; }
-        .container { max-width: 1100px; margin: 20px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
-        
-        h2 { text-align: center; color: #007bff; margin-top: 0; margin-bottom: 25px; font-size: 24px; }
-        .subtitle { text-align: center; color: #666; margin-top: -15px; margin-bottom: 30px; font-size: 14px; }
-
-        /* Desain Grid Menu (Mirip konsep form-group tapi bentuk kotak) */
-        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
-        .menu-card { 
-            background: #fff; border: 2px solid #e9ecef; border-radius: 8px; padding: 20px 15px; 
-            text-align: center; cursor: pointer; transition: all 0.2s ease-in-out; 
-            font-weight: bold; color: #495057; font-size: 15px; display: flex; flex-direction: column; gap: 8px;
+        /* CSS Reset & Full Page Layout */
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: #f8f9fa; color: #333; overflow: hidden; 
+            display: flex; flex-direction: column;
         }
-        .menu-card span.icon { font-size: 24px; }
-        .menu-card:hover { border-color: #007bff; background: #f4f8ff; color: #007bff; transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,123,255,0.1); }
-        .menu-card.active-menu { background: #007bff; color: white; border-color: #007bff; }
 
-        /* Styling Tabel dari Referensimu */
-        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 20px; border: 1px solid #e9ecef; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; text-align: left; font-size: 14px; }
-        th { background-color: #f8f9fa; color: #333; font-weight: bold; }
-        tr:hover { background-color: #f1f7fd; }
-        
-        /* Tombol Link untuk Foto/Invoice */
-        .btn-link { display: inline-block; background: #17a2b8; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; transition: 0.2s; }
+        /* 1. TOP NAVIGATION (Inline & Kompak) */
+        .top-nav {
+            background: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 15px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex-shrink: 0; /* Agar tidak terlipat */
+        }
+        .nav-btn {
+            background: #fff;
+            border: 1px solid #ced4da;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .nav-btn:hover { background: #e2e6ea; }
+        .nav-btn.active { background: #007bff; color: white; border-color: #007bff; }
+
+        /* 2. TOOLBAR (Filter & Pencarian) */
+        .toolbar {
+            padding: 10px 15px;
+            background: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: bold; }
+        .toolbar input {
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+        .toolbar input:focus { border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.25); }
+        .search-box { flex-grow: 1; max-width: 300px; }
+
+        /* 3. AREA TABEL (Full Screen & Scrollable ala Excel) */
+        .table-container {
+            flex-grow: 1; /* Mengisi sisa layar penuh */
+            overflow: auto; /* Bisa scroll atas bawah & kanan kiri */
+            background: #ffffff;
+            position: relative;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap; /* Teks tidak akan turun ke bawah, memanjang seperti Excel */
+        }
+        th, td {
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            font-size: 13px;
+            text-align: left;
+        }
+        /* Efek Freeze Panes (Sticky Header) */
+        th {
+            background-color: #e9ecef;
+            color: #212529;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        tr:hover td { background-color: #f1f7fd; } /* Highlight baris saat disentuh mouse */
+
+        /* Tombol Link/File */
+        .btn-link {
+            display: inline-block; background: #17a2b8; color: white; padding: 4px 8px;
+            border-radius: 3px; text-decoration: none; font-size: 11px; font-weight: bold;
+        }
         .btn-link:hover { background: #138496; }
-        
-        .empty-state { text-align: center; padding: 50px 20px; color: #6c757d; font-size: 15px; background: #f8f9fa; border-radius: 5px; }
 
-        /* Loader dari Referensimu */
-        .loader-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); border-radius: 10px; z-index: 10000; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        .loader-text { font-weight: bold; color: #555; font-size: 15px; text-align: center; }
+        /* Status & Loader */
+        .status-msg { padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
+        .spinner { width: 24px; height: 24px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Responsif untuk Mobile (Max 768px) */
+        /* Responsif Kecil */
         @media screen and (max-width: 768px) {
-            body { padding: 10px; }
-            .container { padding: 15px; margin: 10px auto; }
-            .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .menu-card { padding: 15px 10px; font-size: 13px; }
-            .menu-card span.icon { font-size: 20px; }
-        }
-        
-        /* Responsif super kecil (Max 480px) */
-        @media screen and (max-width: 480px) {
-            .menu-grid { grid-template-columns: 1fr; }
+            .search-box { max-width: 100%; }
+            .toolbar { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
 <body>
 
-<div id="mainContainer" class="container">
-    <!-- Overlay Loading -->
-    <div id="loaderOverlay" class="loader-overlay">
-        <div class="spinner"></div>
-        <div class="loader-text">Menarik data dari server...<br>Mohon tunggu sebentar</div>
+    <!-- 1. NAVIGATION BAR -->
+    <nav class="top-nav">
+        <button class="nav-btn" onclick="tarikData('UTILITIES USAGE - GENERAL AFFAIRS', this)">⚡ Utilities</button>
+        <button class="nav-btn" onclick="tarikData('MONTHLY PROJECT REPORT', this)">📊 Project</button>
+        <button class="nav-btn" onclick="tarikData('Laporan Insiden BCP', this)">🚨 Insiden</button>
+        <button class="nav-btn" onclick="tarikData('FORM DATA TAMU / VISITOR', this)">👥 Tamu/Visitor</button>
+        <button class="nav-btn" onclick="tarikData('FORM PEMINJAMAN KENDARAAN DINAS & VISITOR', this)">🚗 Kendaraan</button>
+        <button class="nav-btn" onclick="tarikData('Pengambilan Barang (Office Supplies)', this)">📦 Supplies</button>
+    </nav>
+
+    <!-- 2. TOOLBAR FILTERING -->
+    <div class="toolbar" id="toolbar" style="display: none;">
+        <div class="filter-group">
+            <label>Cari:</label>
+            <input type="text" id="searchInput" class="search-box" placeholder="Ketik kata kunci apa saja..." oninput="terapkanFilter()">
+        </div>
+        <div class="filter-group">
+            <label>Tgl Mulai:</label>
+            <input type="date" id="dateStart" onchange="terapkanFilter()">
+        </div>
+        <div class="filter-group">
+            <label>Tgl Akhir:</label>
+            <input type="date" id="dateEnd" onchange="terapkanFilter()">
+        </div>
+        <span id="rowCount" style="font-size: 12px; color: #666; margin-left: auto;"></span>
     </div>
 
-    <h2>Dashboard Laporan & Operasional</h2>
-    <div class="subtitle">Pilih modul di bawah ini untuk melihat rekapan data dari Spreadsheet</div>
-
-    <!-- Navigation Panel / Cards -->
-    <div class="menu-grid">
-        <div class="menu-card" onclick="tarikData('UTILITIES USAGE - GENERAL AFFAIRS', this)">
-            <span class="icon">⚡</span> Utilities General Affairs
-        </div>
-        <div class="menu-card" onclick="tarikData('MONTHLY PROJECT REPORT', this)">
-            <span class="icon">📊</span> Monthly Project Report
-        </div>
-        <div class="menu-card" onclick="tarikData('Laporan Insiden BCP', this)">
-            <span class="icon">🚨</span> Laporan Insiden BCP
-        </div>
-        <div class="menu-card" onclick="tarikData('FORM DATA TAMU / VISITOR', this)">
-            <span class="icon">👥</span> Data Tamu / Visitor
-        </div>
-        <div class="menu-card" onclick="tarikData('FORM PEMINJAMAN KENDARAAN DINAS & VISITOR', this)">
-            <span class="icon">🚗</span> Peminjaman Kendaraan
-        </div>
-        <div class="menu-card" onclick="tarikData('Pengambilan Barang (Office Supplies)', this)">
-            <span class="icon">📦</span> Office Supplies
+    <!-- 3. AREA TABEL DATA -->
+    <div class="table-container" id="tableContainer">
+        <div class="status-msg">
+            👆 Silakan pilih modul di menu atas untuk menampilkan data laporan.
         </div>
     </div>
-
-    <!-- Area Tabel Konten -->
-    <h3 id="tableTitle" style="color: #333; font-size: 18px; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px; display: none;">Data Laporan</h3>
-    
-    <div class="table-responsive" id="tableContainer">
-        <div class="empty-state">
-            👆 Silakan klik salah satu menu di atas untuk menampilkan data laporan.
-        </div>
-    </div>
-
-</div>
 
 <script>
     // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
-    const URL_API = "https://script.google.com/macros/s/AKfycbwqEhqsjNtqzey6-neYyg4Bu1F3K95r4Fm4s7_QP-VFs4W5snC1yK1ML6i2gGZgvTq_/exec";
+    const URL_API = "https://script.google.com/macros/s/AKfycbxWkhXX1yFjryCTkDnwcmqlkvUTH4foleoLgr9_0nW7hN3L7_nYbgdBF3rM4CJkg3t1/exec";
 
-    function toggleLoader(show) {
-        document.getElementById('loaderOverlay').style.display = show ? 'flex' : 'none';
-    }
+    // Variabel Global untuk menyimpan data mentah, agar filter bisa cepat tanpa loading API lagi
+    let globalHeaders = [];
+    let globalRows = [];
 
-    // Fungsi untuk menarik data dari GAS
     async function tarikData(sourceName, elemenDiklik) {
-        // Atur status aktif pada menu (visual feedback)
-        document.querySelectorAll('.menu-card').forEach(card => card.classList.remove('active-menu'));
-        elemenDiklik.classList.add('active-menu');
-
-        // Tampilkan judul tabel
-        const titleArea = document.getElementById("tableTitle");
-        titleArea.style.display = "block";
-        titleArea.innerText = "Modul: " + sourceName;
+        // Atur UI Tombol Aktif
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        elemenDiklik.classList.add('active');
 
         const tableContainer = document.getElementById("tableContainer");
+        const toolbar = document.getElementById("toolbar");
         
-        toggleLoader(true); // Nyalakan animasi loading dari kodemu
+        // Sembunyikan toolbar dulu, tampilkan loading
+        toolbar.style.display = "none";
+        tableContainer.innerHTML = `<div class="status-msg"><div class="spinner"></div> Mengambil data ${sourceName}...</div>`;
+
+        // Reset input filter
+        document.getElementById('searchInput').value = '';
+        document.getElementById('dateStart').value = '';
+        document.getElementById('dateEnd').value = '';
 
         try {
-            // Hit API
             let res = await fetch(`${URL_API}?source=${encodeURIComponent(sourceName)}`);
             let data = await res.json();
 
-            // Error handling jika parameter salah atau sheet tidak ditemukan
             if (data.error) {
-                tableContainer.innerHTML = `<div class="empty-state" style="color:#dc3545;">Gagal memuat: ${data.error}</div>`;
-                toggleLoader(false);
+                tableContainer.innerHTML = `<div class="status-msg" style="color:red;">Gagal: ${data.error}</div>`;
                 return;
             }
 
-            // Jika tidak ada data baris (hanya header atau kosong)
             if (!data.rows || data.rows.length === 0) {
-                tableContainer.innerHTML = `<div class="empty-state">Belum ada data/entri pada laporan ini.</div>`;
-                toggleLoader(false);
+                tableContainer.innerHTML = `<div class="status-msg">Data pada laporan ini masih kosong.</div>`;
                 return;
             }
 
-            // Render HTML Tabel
-            let htmlTabel = `<table id="dataTabel"><thead><tr>`;
-            
-            // 1. Looping Header Tabel
-            data.headers.forEach(header => {
-                htmlTabel += `<th>${header}</th>`;
-            });
-            htmlTabel += `</tr></thead><tbody id="bodyDataTabel">`;
+            // Simpan ke variabel global
+            globalHeaders = data.headers;
+            globalRows = data.rows;
 
-            // 2. Looping Baris Data
-            data.rows.forEach(row => {
-                htmlTabel += `<tr>`;
-                row.forEach(cell => {
-                    let isiSel = cell !== undefined && cell !== null ? cell : '-';
-                    
-                    // Deteksi URL (Misal foto dari Google Drive / Invoice) untuk dijadikan tombol
-                    if (typeof isiSel === 'string' && (isiSel.startsWith('http://') || isiSel.startsWith('https://'))) {
-                        isiSel = `<a href="${isiSel}" target="_blank" class="btn-link">Lihat Berkas ↗</a>`;
-                    }
-                    
-                    // Format tanggal (opsional) agar tidak kelihatan terlalu mentah jika formatnya ISO
-                    if (typeof isiSel === 'string' && isiSel.match(/^\d{4}-\d{2}-\d{2}T/)) {
-                        let dateObj = new Date(isiSel);
-                        isiSel = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-                    }
-
-                    htmlTabel += `<td>${isiSel}</td>`;
-                });
-                htmlTabel += `</tr>`;
-            });
-
-            htmlTabel += `</tbody></table>`;
-            tableContainer.innerHTML = htmlTabel;
+            // Tampilkan Toolbar & Render Tabel
+            toolbar.style.display = "flex";
+            renderTabel(globalRows);
 
         } catch (error) {
-            console.error(error);
-            tableContainer.innerHTML = `<div class="empty-state" style="color:#dc3545;">Terjadi kesalahan jaringan atau URL API belum dimasukkan dengan benar.</div>`;
+            tableContainer.innerHTML = `<div class="status-msg" style="color:red;">Gagal terhubung ke server/API.</div>`;
+        }
+    }
+
+    // Fungsi menggambar tabel ke HTML
+    function renderTabel(barisData) {
+        const tableContainer = document.getElementById("tableContainer");
+        
+        if (barisData.length === 0) {
+            tableContainer.innerHTML = `<div class="status-msg">Tidak ada data yang cocok dengan filter.</div>`;
+            document.getElementById('rowCount').innerText = "0 baris";
+            return;
         }
 
-        toggleLoader(false); // Matikan animasi loading
+        let html = `<table><thead><tr>`;
+        globalHeaders.forEach(header => { html += `<th>${header}</th>`; });
+        html += `</tr></thead><tbody>`;
+
+        barisData.forEach(row => {
+            html += `<tr>`;
+            row.forEach(cell => {
+                let isiSel = cell !== undefined && cell !== null ? cell : '';
+                
+                // Cek Link File Drive
+                if (typeof isiSel === 'string' && (isiSel.startsWith('http://') || isiSel.startsWith('https://'))) {
+                    isiSel = `<a href="${isiSel}" target="_blank" class="btn-link">Buka Berkas ↗</a>`;
+                }
+                
+                // Format Tanggal (Opsional)
+                if (typeof isiSel === 'string' && isiSel.match(/^\d{4}-\d{2}-\d{2}T/)) {
+                    let dateObj = new Date(isiSel);
+                    isiSel = dateObj.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+                }
+
+                html += `<td>${isiSel}</td>`;
+            });
+            html += `</tr>`;
+        });
+
+        html += `</tbody></table>`;
+        tableContainer.innerHTML = html;
+        document.getElementById('rowCount').innerText = `Total: ${barisData.length} baris`;
+    }
+
+    // Fungsi Filter Data (Pencarian Teks & Range Tanggal)
+    function terapkanFilter() {
+        let kataKunci = document.getElementById('searchInput').value.toLowerCase();
+        let dateStart = document.getElementById('dateStart').value;
+        let dateEnd = document.getElementById('dateEnd').value;
+
+        // Ubah input tanggal ke object Date untuk perbandingan (jika diisi)
+        let dStart = dateStart ? new Date(dateStart) : null;
+        let dEnd = dateEnd ? new Date(dateEnd) : null;
+        if (dStart) dStart.setHours(0, 0, 0, 0);
+        if (dEnd) dEnd.setHours(23, 59, 59, 999); // Akhir hari
+
+        let hasilFilter = globalRows.filter(row => {
+            // 1. Cek Pencarian Teks (Cari di semua kolom)
+            let teksBaris = row.join(" ").toLowerCase();
+            let lolosTeks = teksBaris.includes(kataKunci);
+
+            // 2. Cek Filter Tanggal 
+            // (Asumsi kolom pertama [index 0] di Spreadsheet kamu adalah "Timestamp" / Tanggal)
+            let lolosTanggal = true;
+            if (dStart || dEnd) {
+                let cellTanggal = new Date(row[0]); 
+                // Jika baris tersebut format tanggalnya valid
+                if (!isNaN(cellTanggal.getTime())) {
+                    if (dStart && cellTanggal < dStart) lolosTanggal = false;
+                    if (dEnd && cellTanggal > dEnd) lolosTanggal = false;
+                }
+            }
+
+            return lolosTeks && lolosTanggal;
+        });
+
+        // Gambar ulang tabel dengan data yang sudah disaring
+        renderTabel(hasilFilter);
     }
 </script>
 

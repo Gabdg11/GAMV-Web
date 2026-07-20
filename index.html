@@ -17,7 +17,6 @@
             display: flex; flex-direction: column;
         }
 
-        /* Scrollbar Elegan */
         ::-webkit-scrollbar { width: 8px; height: 10px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -53,7 +52,7 @@
             display: flex; gap: 15px; flex-wrap: wrap; align-items: center; flex-shrink: 0;
         }
         .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #475569; }
-        .toolbar input {
+        .toolbar input[type="text"], .toolbar input[type="date"] {
             padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
             font-size: 13px; outline: none; transition: 0.2s; color: #0f172a;
         }
@@ -73,27 +72,30 @@
         .table-container {
             flex-grow: 1; overflow: auto; background: #ffffff; position: relative;
         }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; white-space: nowrap; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
         
-        /* PERBAIKAN: Penambahan overflow hidden dan text-overflow agar kolom bisa menyusut */
         th, td { 
             padding: 10px 15px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;
-            font-size: 13px; text-align: left; 
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 13px; text-align: left; vertical-align: top;
         }
         
-        /* Sticky Header Profesional */
+        /* PERBAIKAN: Smart Text Wrap + Line Clamp (Maksimal 4 baris) */
+        .cell-content {
+            white-space: normal;
+            word-wrap: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 4; /* Batas maksimal baris biar tidak gepeng */
+            -webkit-box-orient: vertical;
+        }
+
         th {
             background-color: #f8fafc; color: #334155; position: sticky; top: 0;
             z-index: 10; font-weight: 600; border-top: 1px solid #e2e8f0; border-bottom: 2px solid #cbd5e1;
-            /* Penting untuk logic resize kolom */
-            position: relative; 
-            position: sticky;
-            background-clip: padding-box;
+            position: relative; position: sticky; background-clip: padding-box;
         }
         
-        /* Handler untuk Resize Kolom */
         .resizer {
             position: absolute; right: 0; top: 0; width: 5px; height: 100%;
             cursor: col-resize; user-select: none; z-index: 11;
@@ -107,7 +109,6 @@
         }
         .col-filter-input:focus { border-color: #2563eb; }
         
-        /* Interaksi Baris Tabel */
         tr:hover td { background-color: #f1f5f9; }
         tr.selected td { background-color: #eff6ff; }
         td:first-child, th:first-child { border-left: 1px solid #e2e8f0; }
@@ -120,11 +121,13 @@
 
         .status-msg { padding: 40px 20px; text-align: center; color: #64748b; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; height: 100%; }
         
-        /* Loader Profesional */
         .spinner { width: 30px; height: 30px; border: 3px solid #f1f5f9; border-top: 3px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .chk-box { cursor: pointer; width: 16px; height: 16px; accent-color: #2563eb; }
+        
+        /* Styling khusus untuk checkbox di header (print col selection) */
+        .col-print-chk { cursor: pointer; width: 14px; height: 14px; accent-color: #10b981; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -221,21 +224,25 @@
         
         let html = `<table><thead><tr>`;
         
-        // Header Checkbox Master
+        // Header Checkbox Master (Untuk seleksi baris)
         html += `<th style="width: 40px; text-align: center;">
-                    <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)">
+                    <div style="margin-bottom: 6px;">Cetak</div>
+                    <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)" title="Pilih Semua Baris">
                  </th>`;
         
-        // Header Kolom + Input Filter
+        // Header Kolom + Input Filter + Checkbox Print Kolom
         headers.forEach((header, index) => { 
             html += `<th>
-                        <div style="margin-bottom: 6px; padding-right: 10px;">${header}</div>
-                        <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter baris..." oninput="terapkanFilter()">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                            <div class="cell-content" style="-webkit-line-clamp: 2;" title="${header}">${header}</div>
+                            <input type="checkbox" class="col-print-chk" data-colindex="${index}" checked title="Centang agar kolom ini ikut di-print">
+                        </div>
+                        <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter..." oninput="terapkanFilter()">
                      </th>`; 
         });
         html += `</tr></thead><tbody id="tabelBody">`;
 
-        // Render Baris
+        // Render Baris Data
         barisData.forEach((row, originalIndex) => {
             html += `<tr id="row_${originalIndex}">`;
             
@@ -253,7 +260,9 @@
                     let dateObj = new Date(isiSel);
                     isiSel = dateObj.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
                 }
-                html += `<td>${isiSel}</td>`;
+                
+                // Isi sel dibungkus dengan div.cell-content agar bisa wrap text terukur
+                html += `<td><div class="cell-content" title="${String(isiSel).replace(/<[^>]*>?/gm, '')}">${isiSel}</div></td>`;
             });
             html += `</tr>`;
         });
@@ -266,26 +275,21 @@
     }
 
     // ==========================================
-    // SCRIPT KHUSUS RESIZABLE COLUMNS (VERSI SEMPURNA)
+    // SCRIPT KHUSUS RESIZABLE COLUMNS
     // ==========================================
     function initResizableColumns() {
         const table = document.querySelector('table');
         const cols = document.querySelectorAll('th');
         
-        // 1. Trik: Kunci lebar aktual setiap kolom sesaat setelah data dimuat
         cols.forEach(col => {
             col.style.width = `${col.offsetWidth}px`;
         });
         
-        // 2. Ubah mode tabel jadi 'fixed' supaya kolom pasrah saat di-resize script
         table.style.tableLayout = 'fixed';
-        
-        // 3. Biarkan tabel bebas melebar (horizontal scroll) kalau kolom ditarik
         table.style.width = 'max-content'; 
         table.style.minWidth = '100%';
 
         cols.forEach(col => {
-            // Buat elemen handler di ujung kanan kolom
             const resizer = document.createElement('div');
             resizer.classList.add('resizer');
             col.appendChild(resizer);
@@ -294,9 +298,7 @@
             let w = 0;
 
             const mouseDownHandler = function (e) {
-                // Matikan blok teks agar layar tidak tersorot biru saat kursor digeser
                 document.body.style.userSelect = 'none';
-                
                 x = e.clientX;
                 w = col.offsetWidth;
 
@@ -309,14 +311,13 @@
                 const dx = e.clientX - x;
                 let newWidth = w + dx;
                 
-                // Batas minimal lebar kolom (60px) supaya elemen checkbox/filter tidak hilang
-                if (newWidth < 60) newWidth = 60; 
+                // Batas minimal lebar kolom (100px) agar checkbox dan filter tidak tertimpa/hilang
+                if (newWidth < 100) newWidth = 100; 
 
                 col.style.width = `${newWidth}px`;
             };
 
             const mouseUpHandler = function () {
-                // Kembalikan fungsi seleksi teks seperti semula
                 document.body.style.userSelect = ''; 
                 document.removeEventListener('mousemove', mouseMoveHandler);
                 document.removeEventListener('mouseup', mouseUpHandler);
@@ -328,7 +329,7 @@
     }
 
     // ==========================================
-    // LOGIKA HIGHLIGHT, FILTER & PRINT
+    // LOGIKA HIGHLIGHT & FILTER
     // ==========================================
     function highlightRow(checkbox) {
         let tr = checkbox.closest('tr');
@@ -406,10 +407,20 @@
         document.getElementById('chkAll').checked = false;
     }
 
+    // ==========================================
+    // LOGIKA CETAK DATA (Hanya Kolom & Baris Terpilih)
+    // ==========================================
     function cetakData() {
         let checkedBoxes = document.querySelectorAll('.row-chk:checked');
         if (checkedBoxes.length === 0) {
             return alert("Pilih minimal satu baris data untuk dicetak.");
+        }
+
+        // Ambil index kolom mana saja yang dicentang oleh user di header
+        let checkedCols = Array.from(document.querySelectorAll('.col-print-chk:checked')).map(chk => parseInt(chk.getAttribute('data-colindex')));
+        
+        if (checkedCols.length === 0) {
+            return alert("Pilih minimal satu kolom untuk dicetak melalui checkbox hijau di header tabel.");
         }
 
         let printWindow = window.open('', '_blank');
@@ -424,7 +435,7 @@
                     h2 { text-align: center; color: #0f172a; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
                     .print-date { text-align: center; margin-bottom: 25px; color: #64748b; font-size: 12px; }
                     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; vertical-align: top; }
+                    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; vertical-align: top; word-wrap: break-word; }
                     th { background-color: #f8fafc; font-weight: 700; color: #334155; }
                     @media print { @page { size: landscape; margin: 15mm; } }
                 </style>
@@ -436,17 +447,23 @@
                     <thead><tr>
         `;
 
-        globalHeaders.forEach(h => {
-            printHtml += `<th>${h}</th>`;
+        // Render Header yang dicentang saja
+        checkedCols.forEach(colIndex => {
+            printHtml += `<th>${globalHeaders[colIndex]}</th>`;
         });
         printHtml += `</tr></thead><tbody>`;
 
+        // Render Baris Data
         checkedBoxes.forEach(chk => {
             let tr = chk.closest('tr');
             printHtml += `<tr>`;
             
-            for (let i = 1; i < tr.cells.length; i++) {
-                let cellContent = tr.cells[i].innerHTML;
+            checkedCols.forEach(colIndex => {
+                // Ekstrak isi dari .cell-content agar saat diprint tampil utuh tanpa terpotong
+                let td = tr.cells[colIndex + 1]; // +1 karena kolom index 0 di tabel HTML adalah kolom Master Checkbox baris
+                let cellDiv = td.querySelector('.cell-content');
+                let cellContent = cellDiv ? cellDiv.innerHTML : td.innerHTML;
+
                 if(cellContent.includes('<a href=')) {
                     let hrefMatch = cellContent.match(/href="([^"]*)"/);
                     if(hrefMatch && hrefMatch[1]) {
@@ -454,7 +471,7 @@
                     }
                 }
                 printHtml += `<td>${cellContent}</td>`;
-            }
+            });
             printHtml += `</tr>`;
         });
 

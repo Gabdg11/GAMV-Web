@@ -3,91 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Operasional System</title>
+    <title>Enterprise Dashboard System</title>
     <style>
-        /* CSS Reset & Full Page Layout */
+        /* =========================================
+           1. CSS RESET & ENTERPRISE TYPOGRAPHY
+           ========================================= */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
         body, html { 
             margin: 0; padding: 0; height: 100%; 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background: #f8f9fa; color: #333; overflow: hidden; 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            background: #f1f5f9; color: #1e293b; overflow: hidden; 
             display: flex; flex-direction: column;
         }
 
-        /* 1. TOP NAVIGATION */
+        /* Scrollbar Elegan */
+        ::-webkit-scrollbar { width: 8px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* =========================================
+           2. TOP NAVIGATION BAR
+           ========================================= */
         .top-nav {
-            background: #ffffff; border-bottom: 1px solid #dee2e6;
-            padding: 10px 15px; display: flex; gap: 10px;
+            background: #ffffff; border-bottom: 1px solid #e2e8f0;
+            padding: 12px 20px; display: flex; gap: 10px;
             overflow-x: auto; white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); flex-shrink: 0;
+            align-items: center;
+        }
+        .brand-title {
+            font-weight: 700; font-size: 15px; color: #0f172a; 
+            margin-right: 20px; border-right: 2px solid #e2e8f0; padding-right: 20px;
         }
         .nav-btn {
-            background: #fff; border: 1px solid #ced4da; padding: 6px 12px;
-            border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
-            color: #495057; transition: 0.2s; display: flex; align-items: center; gap: 5px;
+            background: #ffffff; border: 1px solid #e2e8f0; padding: 8px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+            color: #475569; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
         }
-        .nav-btn:hover { background: #e2e6ea; }
-        .nav-btn.active { background: #007bff; color: white; border-color: #007bff; }
+        .nav-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
+        .nav-btn.active { background: #2563eb; color: #ffffff; border-color: #2563eb; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
 
-        /* 2. TOOLBAR */
+        /* =========================================
+           3. TOOLBAR FILTERING & PRINT
+           ========================================= */
         .toolbar {
-            padding: 10px 15px; background: #ffffff; border-bottom: 1px solid #dee2e6;
+            padding: 12px 20px; background: #ffffff; border-bottom: 1px solid #e2e8f0;
             display: flex; gap: 15px; flex-wrap: wrap; align-items: center; flex-shrink: 0;
         }
-        .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: bold; }
+        .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #475569; }
         .toolbar input {
-            padding: 6px 10px; border: 1px solid #ced4da; border-radius: 4px;
-            font-size: 13px; outline: none;
+            padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 13px; outline: none; transition: 0.2s; color: #0f172a;
         }
-        .toolbar input:focus { border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.25); }
-        .search-box { flex-grow: 1; max-width: 300px; }
+        .toolbar input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .search-box { flex-grow: 1; max-width: 350px; }
         
         .btn-print {
-            background: #28a745; color: white; border: none; padding: 7px 15px;
-            border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;
-            margin-left: auto; display: flex; align-items: center; gap: 5px;
+            background: #10b981; color: #ffffff; border: none; padding: 8px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+            margin-left: auto; display: flex; align-items: center; gap: 6px; transition: 0.2s;
         }
-        .btn-print:hover { background: #218838; }
+        .btn-print:hover { background: #059669; box-shadow: 0 2px 4px rgba(16,185,129,0.2); }
 
-        /* 3. AREA TABEL */
+        /* =========================================
+           4. DATA TABLE AREA (EXCEL LIKE)
+           ========================================= */
         .table-container {
             flex-grow: 1; overflow: auto; background: #ffffff; position: relative;
         }
-        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        th, td { padding: 8px 12px; border: 1px solid #dee2e6; font-size: 13px; text-align: left; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; white-space: nowrap; }
+        th, td { 
+            padding: 10px 15px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;
+            font-size: 13px; text-align: left; 
+        }
         
-        /* Header Sticky & Filter Kolom */
+        /* Sticky Header Profesional */
         th {
-            background-color: #e9ecef; color: #212529; position: sticky; top: 0;
-            z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.1); vertical-align: bottom;
+            background-color: #f8fafc; color: #334155; position: sticky; top: 0;
+            z-index: 10; font-weight: 600; border-top: 1px solid #e2e8f0; border-bottom: 2px solid #cbd5e1;
+            /* Penting untuk logic resize kolom */
+            position: relative; 
+            position: sticky;
+            background-clip: padding-box;
         }
-        .col-filter-input {
-            width: 100%; box-sizing: border-box; padding: 4px; margin-top: 5px;
-            border: 1px solid #ced4da; border-radius: 3px; font-size: 11px;
-            font-weight: normal; outline: none;
-        }
-        .col-filter-input:focus { border-color: #007bff; }
         
-        tr:hover td { background-color: #f1f7fd; }
-        tr.selected td { background-color: #e8f4ff; } /* Highlight baris tercentang */
+        /* Handler untuk Resize Kolom */
+        .resizer {
+            position: absolute; right: 0; top: 0; width: 5px; height: 100%;
+            cursor: col-resize; user-select: none; z-index: 11;
+        }
+        .resizer:hover, .resizing { border-right: 2px solid #2563eb; background: rgba(37,99,235,0.1); }
+
+        .col-filter-input {
+            width: 100%; box-sizing: border-box; padding: 6px; margin-top: 8px;
+            border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;
+            font-weight: normal; outline: none; background: #ffffff;
+        }
+        .col-filter-input:focus { border-color: #2563eb; }
+        
+        /* Interaksi Baris Tabel */
+        tr:hover td { background-color: #f1f5f9; }
+        tr.selected td { background-color: #eff6ff; }
+        td:first-child, th:first-child { border-left: 1px solid #e2e8f0; }
 
         .btn-link {
-            display: inline-block; background: #17a2b8; color: white; padding: 4px 8px;
-            border-radius: 3px; text-decoration: none; font-size: 11px; font-weight: bold;
+            display: inline-block; background: #0ea5e9; color: #ffffff; padding: 4px 10px;
+            border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s;
         }
-        .btn-link:hover { background: #138496; }
+        .btn-link:hover { background: #0284c7; }
 
-        .status-msg { padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
-        .spinner { width: 24px; height: 24px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        .status-msg { padding: 40px 20px; text-align: center; color: #64748b; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; height: 100%; }
+        
+        /* Loader Profesional */
+        .spinner { width: 30px; height: 30px; border: 3px solid #f1f5f9; border-top: 3px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Checkbox styling */
-        .chk-box { cursor: pointer; width: 16px; height: 16px; }
+        .chk-box { cursor: pointer; width: 16px; height: 16px; accent-color: #2563eb; }
     </style>
 </head>
 <body>
 
     <!-- 1. NAVIGATION BAR -->
     <nav class="top-nav">
+        <div class="brand-title">WORKSPACE</div>
         <button class="nav-btn" onclick="tarikData('UTILITIES USAGE - GENERAL AFFAIRS', this)">⚡ Utilities</button>
         <button class="nav-btn" onclick="tarikData('MONTHLY PROJECT REPORT', this)">📊 Project</button>
         <button class="nav-btn" onclick="tarikData('Laporan Insiden BCP', this)">🚨 Insiden</button>
@@ -99,19 +139,18 @@
     <!-- 2. TOOLBAR FILTERING & PRINT -->
     <div class="toolbar" id="toolbar" style="display: none;">
         <div class="filter-group">
-            <label>Pencarian Global:</label>
-            <input type="text" id="searchInput" class="search-box" placeholder="Ketik kata kunci..." oninput="terapkanFilter()">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Cari data di semua kolom..." oninput="terapkanFilter()">
         </div>
-        <div class="filter-group">
-            <label>Tgl Mulai:</label>
+        <div class="filter-group" style="border-left: 1px solid #e2e8f0; padding-left: 15px;">
+            <label>Mulai:</label>
             <input type="date" id="dateStart" onchange="terapkanFilter()">
         </div>
         <div class="filter-group">
-            <label>Tgl Akhir:</label>
+            <label>Akhir:</label>
             <input type="date" id="dateEnd" onchange="terapkanFilter()">
         </div>
         
-        <span id="rowCount" style="font-size: 12px; color: #666; margin-left: 15px;"></span>
+        <span id="rowCount" style="font-size: 13px; font-weight:600; color: #475569; margin-left: 15px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px;"></span>
         
         <button class="btn-print" onclick="cetakData()">🖨️ Cetak Terpilih</button>
     </div>
@@ -119,7 +158,8 @@
     <!-- 3. AREA TABEL DATA -->
     <div class="table-container" id="tableContainer">
         <div class="status-msg">
-            👆 Silakan pilih modul di menu atas untuk menampilkan data laporan.
+            <svg style="width: 48px; height: 48px; color: #cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>Silakan pilih modul di menu atas untuk menampilkan database.</span>
         </div>
     </div>
 
@@ -140,9 +180,8 @@
         const toolbar = document.getElementById("toolbar");
         
         toolbar.style.display = "none";
-        tableContainer.innerHTML = `<div class="status-msg"><div class="spinner"></div> Mengambil data ${sourceName}...</div>`;
+        tableContainer.innerHTML = `<div class="status-msg"><div class="spinner"></div><span>Sinkronisasi data ${sourceName}...</span></div>`;
 
-        // Reset semua filter
         document.getElementById('searchInput').value = '';
         document.getElementById('dateStart').value = '';
         document.getElementById('dateEnd').value = '';
@@ -152,12 +191,12 @@
             let data = await res.json();
 
             if (data.error) {
-                tableContainer.innerHTML = `<div class="status-msg" style="color:red;">Gagal: ${data.error}</div>`;
+                tableContainer.innerHTML = `<div class="status-msg" style="color:#ef4444;">Gagal: ${data.error}</div>`;
                 return;
             }
 
             if (!data.rows || data.rows.length === 0) {
-                tableContainer.innerHTML = `<div class="status-msg">Data pada laporan ini masih kosong.</div>`;
+                tableContainer.innerHTML = `<div class="status-msg">Data pada modul ini masih kosong.</div>`;
                 return;
             }
 
@@ -166,10 +205,10 @@
 
             toolbar.style.display = "flex";
             renderTabel(globalHeaders, globalRows);
-            document.getElementById('rowCount').innerText = `Tampil: ${globalRows.length} baris`;
+            document.getElementById('rowCount').innerText = `${globalRows.length} Baris Data`;
 
         } catch (error) {
-            tableContainer.innerHTML = `<div class="status-msg" style="color:red;">Gagal terhubung ke server/API.</div>`;
+            tableContainer.innerHTML = `<div class="status-msg" style="color:#ef4444;">Gagal terhubung ke server database.</div>`;
         }
     }
 
@@ -178,16 +217,16 @@
         
         let html = `<table><thead><tr>`;
         
-        // Checkbox Master (Pilih Semua)
-        html += `<th style="width: 30px; text-align: center;">
+        // Header Checkbox Master
+        html += `<th style="width: 40px; text-align: center;">
                     <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)">
                  </th>`;
         
-        // Header & Input Filter Kolom
+        // Header Kolom + Input Filter
         headers.forEach((header, index) => { 
             html += `<th>
-                        <div style="margin-bottom: 4px;">${header}</div>
-                        <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter..." oninput="terapkanFilter()">
+                        <div style="margin-bottom: 6px; padding-right: 10px;">${header}</div>
+                        <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter baris..." oninput="terapkanFilter()">
                      </th>`; 
         });
         html += `</tr></thead><tbody id="tabelBody">`;
@@ -217,9 +256,53 @@
 
         html += `</tbody></table>`;
         tableContainer.innerHTML = html;
+
+        // Inisiasi Fitur Resizable Columns (Drag untuk Lebarkan Kolom)
+        initResizableColumns();
     }
 
-    // Fungsi Checklist Highlight
+    // ==========================================
+    // SCRIPT KHUSUS RESIZABLE COLUMNS
+    // ==========================================
+    function initResizableColumns() {
+        const cols = document.querySelectorAll('th');
+        cols.forEach(col => {
+            // Buat elemen handler (garis tak terlihat di ujung kanan kolom)
+            const resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            col.appendChild(resizer);
+            
+            let x = 0;
+            let w = 0;
+
+            const mouseDownHandler = function (e) {
+                x = e.clientX;
+                const styles = window.getComputedStyle(col);
+                w = parseInt(styles.width, 10);
+
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+                resizer.classList.add('resizing');
+            };
+
+            const mouseMoveHandler = function (e) {
+                const dx = e.clientX - x;
+                col.style.width = `${w + dx}px`;
+            };
+
+            const mouseUpHandler = function () {
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+                resizer.classList.remove('resizing');
+            };
+
+            resizer.addEventListener('mousedown', mouseDownHandler);
+        });
+    }
+
+    // ==========================================
+    // LOGIKA HIGHLIGHT, FILTER & PRINT
+    // ==========================================
     function highlightRow(checkbox) {
         let tr = checkbox.closest('tr');
         if (checkbox.checked) {
@@ -230,7 +313,6 @@
     }
 
     function toggleCheckAll(masterCheckbox) {
-        // Hanya centang baris yang sedang TAMPIL (tidak ter-filter)
         let visibleRows = document.querySelectorAll('#tabelBody tr:not([style*="display: none"])');
         visibleRows.forEach(tr => {
             let chk = tr.querySelector('.row-chk');
@@ -239,7 +321,6 @@
         });
     }
 
-    // Fungsi Filter Data (Menggunakan teknik DOM Hiding agar checkbox tidak hilang saat ngetik)
     function terapkanFilter() {
         let globalCari = document.getElementById('searchInput').value.toLowerCase();
         let dateStart = document.getElementById('dateStart').value;
@@ -250,22 +331,19 @@
         if (dStart) dStart.setHours(0, 0, 0, 0);
         if (dEnd) dEnd.setHours(23, 59, 59, 999);
 
-        // Ambil semua input filter kolom
         let colFilters = Array.from(document.querySelectorAll('.col-filter-input')).map(input => {
             return { index: parseInt(input.getAttribute('data-colindex')), keyword: input.value.toLowerCase() };
-        }).filter(f => f.keyword !== ""); // Hanya ambil yang diketik sesuatu
+        }).filter(f => f.keyword !== "");
 
         let trs = document.querySelectorAll('#tabelBody tr');
         let countVisible = 0;
 
         trs.forEach((tr, index) => {
-            let rowData = globalRows[index]; // Ambil data murni sesuai urutan render
+            let rowData = globalRows[index];
             let teksBaris = rowData.join(" ").toLowerCase();
             
-            // 1. Cek Global Search
             let lolosGlobal = teksBaris.includes(globalCari);
 
-            // 2. Cek Date (Asumsi kolom pertama adalah Timestamp)
             let lolosTgl = true;
             if (dStart || dEnd) {
                 let cellTanggal = new Date(rowData[0]); 
@@ -275,7 +353,6 @@
                 }
             }
 
-            // 3. Cek Filter Kolom Spesifik
             let lolosCol = true;
             for (let f of colFilters) {
                 let cellData = rowData[f.index] !== undefined && rowData[f.index] !== null ? String(rowData[f.index]).toLowerCase() : "";
@@ -285,13 +362,11 @@
                 }
             }
 
-            // Terapkan hasil: Sembunyikan atau Tampilkan Baris
             if (lolosGlobal && lolosTgl && lolosCol) {
                 tr.style.display = "";
                 countVisible++;
             } else {
                 tr.style.display = "none";
-                // Otomatis uncheck baris yang disembunyikan agar tidak ikut ke-print
                 let chk = tr.querySelector('.row-chk');
                 if(chk.checked) {
                     chk.checked = false;
@@ -300,67 +375,57 @@
             }
         });
         
-        document.getElementById('rowCount').innerText = `Tampil: ${countVisible} baris`;
-        document.getElementById('chkAll').checked = false; // Reset master checkbox
+        document.getElementById('rowCount').innerText = `${countVisible} Baris Data`;
+        document.getElementById('chkAll').checked = false;
     }
 
-    // Fungsi Cetak (Print) Baris yang di-checklist
     function cetakData() {
         let checkedBoxes = document.querySelectorAll('.row-chk:checked');
         if (checkedBoxes.length === 0) {
-            return alert("Silakan centang minimal satu baris data yang ingin dicetak.");
+            return alert("Pilih minimal satu baris data untuk dicetak.");
         }
 
         let printWindow = window.open('', '_blank');
         
-        // Buat struktur HTML khusus untuk halaman Print
         let printHtml = `
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Cetak Data - ${currentModule}</title>
+                <title>Print Document - ${currentModule}</title>
                 <style>
-                    body { font-family: Arial, sans-serif; font-size: 11px; color: #333; padding: 20px; }
-                    h2 { text-align: center; color: #000; margin-bottom: 5px; }
-                    .print-date { text-align: center; margin-bottom: 20px; color: #555; }
+                    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #1e293b; padding: 20px; }
+                    h2 { text-align: center; color: #0f172a; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+                    .print-date { text-align: center; margin-bottom: 25px; color: #64748b; font-size: 12px; }
                     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    th, td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: top; }
-                    th { background-color: #f2f2f2; font-weight: bold; }
-                    @media print {
-                        @page { size: landscape; margin: 10mm; }
-                    }
+                    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; vertical-align: top; }
+                    th { background-color: #f8fafc; font-weight: 700; color: #334155; }
+                    @media print { @page { size: landscape; margin: 15mm; } }
                 </style>
             </head>
             <body>
-                <h2>Laporan Operasional</h2>
-                <div class="print-date">Modul: <strong>${currentModule}</strong> | Dicetak pada: ${new Date().toLocaleString('id-ID')}</div>
+                <h2>Dokumen Laporan Operasional</h2>
+                <div class="print-date">Modul: <strong>${currentModule}</strong> &nbsp;|&nbsp; Dicetak: ${new Date().toLocaleString('id-ID')}</div>
                 <table>
                     <thead><tr>
         `;
 
-        // Tambahkan Header (tanpa kolom checkbox)
         globalHeaders.forEach(h => {
             printHtml += `<th>${h}</th>`;
         });
         printHtml += `</tr></thead><tbody>`;
 
-        // Tambahkan Data Baris yang tercentang (tanpa kolom checkbox)
         checkedBoxes.forEach(chk => {
             let tr = chk.closest('tr');
             printHtml += `<tr>`;
             
-            // Loop sel tabel dimulai dari index 1 (melewati checkbox di index 0)
             for (let i = 1; i < tr.cells.length; i++) {
                 let cellContent = tr.cells[i].innerHTML;
-                
-                // Bersihkan tombol link agar tidak aneh saat diprint, ubah jadi teks URL mentahnya saja
                 if(cellContent.includes('<a href=')) {
                     let hrefMatch = cellContent.match(/href="([^"]*)"/);
                     if(hrefMatch && hrefMatch[1]) {
-                        cellContent = `<span style="word-break: break-all; color: blue;">${hrefMatch[1]}</span>`;
+                        cellContent = `<span style="word-break: break-all; color: #2563eb; text-decoration: underline;">${hrefMatch[1]}</span>`;
                     }
                 }
-                
                 printHtml += `<td>${cellContent}</td>`;
             }
             printHtml += `</tr>`;
@@ -369,9 +434,7 @@
         printHtml += `
                     </tbody>
                 </table>
-                <script>
-                    window.onload = function() { window.print(); };
-                <\/script>
+                <script> window.onload = function() { window.print(); }; <\/script>
             </body>
             </html>
         `;

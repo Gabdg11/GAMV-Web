@@ -1,152 +1,586 @@
-function doGet(e) {
-  try {
-    var sourceType = e ? e.parameter.source : "";
-    var spreadsheetId = "";
-
-    if (sourceType === "FORM DATA TAMU / VISITOR") {
-      spreadsheetId = "1t5MrSRodqJv4tWjPWxKrri_d5IX9fyY2A6DocoF0eYY";
-    } else if (sourceType === "Laporan Insiden BCP") {
-      spreadsheetId = "1Htazvf2Kh61MwpKWxrwqlhqg9mwOTM-SR3EziYi2dTE";
-    } else if (sourceType === "MONTHLY PROJECT REPORT") {
-      spreadsheetId = "1TrwVnEOh_iMfFC3eoTnSCUs9_VuPI8pWX-9ggHrJjSs";
-    } else if (sourceType === "Pengambilan Barang (Office Supplies)") {
-      spreadsheetId = "1s5wlWRHvmyetn8VquRmAUotOQO_wsBNXNVyJPZ1D2zM";
-    } else if (sourceType === "UTILITIES USAGE - GENERAL AFFAIRS") {
-      spreadsheetId = "1cswPNjQOz5kqjRGYLOO3JUfA9ztLycpaEHTdH607zGM";
-    } else if (sourceType === "FORM PEMINJAMAN KENDARAAN DINAS & VISITOR") {
-      spreadsheetId = "1haXlT7qPVSPVrGwaV6RStA3ksq646jUSuYzvvE_VFI0";
-    } 
-
-    if (!spreadsheetId) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ error: "Parameter source tidak valid atau kosong!" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    var sheet = SpreadsheetApp.openById(spreadsheetId).getActiveSheet();
-    var data = sheet.getDataRange().getValues();
-    
-    var headers = data[0];
-    var rawRows = data.slice(1); 
-
-    var formattedRows = rawRows.map(function(row) {
-      return row.map(function(cellValue, colIndex) {
-        var headerName = headers[colIndex] ? String(headers[colIndex]).trim() : "";
-        return formatCellByRules(cellValue, headerName, sourceType);
-      });
-    });
-
-    var result = {
-      headers: headers,
-      rows: formattedRows
-    };
-
-    return ContentService
-      .createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
-
-  } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ error: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * Fungsi Pintar Pemformatan Sesuai Aturan Kolom
- */
-function formatCellByRules(val, headerName, sourceType) {
-  if (val === "" || val === null || val === undefined) {
-    return "";
-  }
-
-  var hLower = headerName.toLowerCase();
-  var strVal = String(val).trim();
-
-  // 1. FORMAT RUPIAH (Harga / Biaya)
-  if (hLower.includes("harga") || hLower.includes("biaya")) {
-    var num = Number(String(val).replace(/[^0-9.-]+/g,""));
-    if (!isNaN(num) && num !== 0) {
-      return "Rp " + num.toLocaleString("id-ID");
-    }
-  }
-
-  // 2. FORMAT ONLY CLOCK (Waktu / Jam saja, Bersih dari 1899 & GMT)
-  if (hLower.includes("waktu") || hLower.includes("jam")) {
-    // Jika dari objek Date atau string waktu
-    var d = parseToDate(val);
-    if (d) {
-      var hh = String(d.getHours()).padStart(2, '0');
-      var mm = String(d.getMinutes()).padStart(2, '0');
-      // Jika jam/menit valid (bukan 00:00 default mutlak akibat salah baca 1899)
-      if (hh !== "00" || mm !== "00" || strVal.includes("00:00")) {
-        // Cek apakah aslinya memang jam 00.00 atau karena parsing 1899
-        if (!strVal.includes("1899-12-30 00:00")) {
-          return hh + "." + mm;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Dashboard System</title>
+    <style>
+        /* =========================================
+           1. CSS RESET & ENTERPRISE TYPOGRAPHY
+           ========================================= */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary-blue: #297ec6;
+            --primary-yellow: #ffde17;
+            --bg-color: #f4f7f9;
+            --text-main: #1e293b;
         }
-      }
-    }
-    // Ekstraksi teks manual jika string mengandung format jam
-    if (strVal.includes("1899") || strVal.includes("T")) {
-      var timeMatch = strVal.match(/(\d{2}):(\d{2})/);
-      if (timeMatch && timeMatch[1] !== "00") {
-        return timeMatch[1] + "." + timeMatch[2];
-      }
-    }
-    // Jika bentuknya string jam biasa misal "09:07:00"
-    var simpleTime = strVal.match(/^(\d{2}):(\d{2})/);
-    if (simpleTime) {
-      return simpleTime[1] + "." + simpleTime[2];
-    }
-  }
+        
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            background: var(--bg-color); color: var(--text-main); overflow: hidden; 
+            display: flex; flex-direction: column;
+        }
 
-  // 3. FORMAT ONLY DATE (Tanggal saja, tanpa jam 00.00)
-  if (hLower.includes("tanggal") || hLower.includes("tgl")) {
-    var dDate = parseToDate(val);
-    if (dDate) {
-      return formatDateID(dDate);
+        ::-webkit-scrollbar { width: 8px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* =========================================
+           2. TOP NAVIGATION BAR
+           ========================================= */
+        .top-nav {
+            background: #ffffff; border-bottom: 1px solid #e2e8f0;
+            padding: 12px 20px; display: flex; gap: 10px;
+            overflow-x: auto; white-space: nowrap;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05); flex-shrink: 0;
+            align-items: center;
+        }
+        .brand-title {
+            font-weight: 700; font-size: 15px; color: var(--primary-blue); 
+            margin-right: 20px; border-right: 2px solid #e2e8f0; padding-right: 20px;
+            letter-spacing: 0.5px;
+        }
+        .nav-btn {
+            background: #ffffff; border: 1px solid #e2e8f0; padding: 8px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+            color: #475569; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
+        }
+        .nav-btn:hover { background: #fffdf0; border-color: var(--primary-yellow); color: var(--text-main); }
+        .nav-btn.active { background: var(--primary-blue); color: #ffffff; border-color: var(--primary-blue); box-shadow: 0 2px 4px rgba(41, 126, 198, 0.2); }
+
+        /* =========================================
+           3. TOOLBAR FILTERING & PRINT
+           ========================================= */
+        .toolbar {
+            padding: 12px 20px; background: #ffffff; border-bottom: 1px solid #e2e8f0;
+            display: flex; gap: 15px; flex-wrap: wrap; align-items: center; flex-shrink: 0;
+        }
+        .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #475569; }
+        .toolbar input[type="text"], .toolbar input[type="date"] {
+            padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 13px; outline: none; transition: 0.2s; color: var(--text-main);
+        }
+        .toolbar input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(41, 126, 198, 0.15); }
+        .search-box { flex-grow: 1; max-width: 350px; }
+        
+        .btn-print {
+            background: var(--primary-yellow); color: var(--text-main); border: none; padding: 8px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700;
+            margin-left: auto; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(255, 222, 23, 0.3);
+        }
+        .btn-print:hover { background: #e5c714; box-shadow: 0 2px 6px rgba(255, 222, 23, 0.5); transform: translateY(-1px); }
+
+        /* =========================================
+           4. DATA TABLE AREA (EXCEL LIKE)
+           ========================================= */
+        .table-container {
+            flex-grow: 1; overflow: auto; background: #ffffff; position: relative;
+        }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        
+        th, td { 
+            padding: 10px 15px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;
+            font-size: 13px; text-align: left; vertical-align: top;
+        }
+        
+        .cell-content {
+            white-space: normal;
+            word-wrap: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 4; 
+            -webkit-box-orient: vertical;
+        }
+
+        th {
+            background-color: #f8fafc; color: #334155; position: sticky; top: 0;
+            z-index: 10; font-weight: 600; border-top: 1px solid #e2e8f0; border-bottom: 2px solid #cbd5e1;
+            position: relative; background-clip: padding-box;
+        }
+        
+        .resizer {
+            position: absolute; right: 0; top: 0; width: 5px; height: 100%;
+            cursor: col-resize; user-select: none; z-index: 11;
+        }
+        .resizer:hover, .resizing { border-right: 2px solid var(--primary-blue); background: rgba(41, 126, 198, 0.1); }
+
+        .col-filter-input {
+            width: 100%; box-sizing: border-box; padding: 6px; margin-top: 8px;
+            border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;
+            font-weight: normal; outline: none; background: #ffffff; transition: 0.2s;
+        }
+        .col-filter-input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 2px rgba(41, 126, 198, 0.15); }
+        
+        tr:hover td { background-color: #f4f9fd; }
+        tr.selected td { background-color: #eaf3fa; }
+        td:first-child, th:first-child { border-left: 1px solid #e2e8f0; }
+
+        .btn-link {
+            display: inline-block; background: var(--primary-blue); color: #ffffff; padding: 4px 10px;
+            border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s;
+        }
+        .btn-link:hover { background: var(--primary-yellow); color: var(--text-main); }
+
+        .status-msg { padding: 40px 20px; text-align: center; color: #64748b; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; height: 100%; }
+        
+        .spinner { width: 30px; height: 30px; border: 3px solid #f1f5f9; border-top: 3px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .chk-box { cursor: pointer; width: 16px; height: 16px; accent-color: var(--primary-blue); }
+        .col-print-chk { cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary-blue); flex-shrink: 0; }
+        .header-sort:hover { color: var(--primary-blue); }
+    </style>
+</head>
+<body>
+
+    <!-- 1. NAVIGATION BAR -->
+    <nav class="top-nav">
+        <div class="brand-title">DASHBOARD GA-CM</div>
+        <button class="nav-btn" onclick="tarikData('UTILITIES USAGE - GENERAL AFFAIRS', this)">⚡ Utilities</button>
+        <button class="nav-btn" onclick="tarikData('MONTHLY PROJECT REPORT', this)">📊 Project</button>
+        <button class="nav-btn" onclick="tarikData('Laporan Insiden BCP', this)">🚨 Insiden</button>
+        <button class="nav-btn" onclick="tarikData('FORM DATA TAMU / VISITOR', this)">👥 Tamu/Visitor</button>
+        <button class="nav-btn" onclick="tarikData('FORM PEMINJAMAN KENDARAAN DINAS & VISITOR', this)">🚗 Kendaraan</button>
+        <button class="nav-btn" onclick="tarikData('Pengambilan Barang (Office Supplies)', this)">📦 Supplies</button>
+    </nav>
+
+    <!-- 2. TOOLBAR FILTERING & PRINT -->
+    <div class="toolbar" id="toolbar" style="display: none;">
+        <div class="filter-group">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Cari data di semua kolom..." oninput="terapkanFilter()">
+        </div>
+        <div class="filter-group" style="border-left: 1px solid #e2e8f0; padding-left: 15px;">
+            <label>Mulai:</label>
+            <input type="date" id="dateStart" onchange="terapkanFilter()">
+        </div>
+        <div class="filter-group">
+            <label>Akhir:</label>
+            <input type="date" id="dateEnd" onchange="terapkanFilter()">
+        </div>
+        
+        <span id="rowCount" style="font-size: 13px; font-weight:600; color: #475569; margin-left: 15px; background: #eaf3fa; color: var(--primary-blue); padding: 6px 12px; border-radius: 20px;"></span>
+        
+        <button class="btn-print" onclick="cetakData()">🖨️ Cetak Terpilih</button>
+    </div>
+
+    <!-- 3. AREA TABEL DATA -->
+    <div class="table-container" id="tableContainer">
+        <div class="status-msg">
+            <svg style="width: 48px; height: 48px; color: #cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>Silakan pilih modul di menu atas untuk menampilkan database.</span>
+        </div>
+    </div>
+
+<script>
+    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
+    const URL_API = "https://script.google.com/macros/s/AKfycbyLNZvX8XntHCspweBiMG5wJIFVtQ0HtekMRtz9TpCf37Fha-EJoKKnue1aFRpHbPb1/exec";
+
+    let globalHeaders = [];
+    let globalRows = [];
+    let currentModule = "";
+    
+    let currentSortCol = -1;
+    let currentSortAsc = true;
+
+    async function tarikData(sourceName, elemenDiklik) {
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        elemenDiklik.classList.add('active');
+        currentModule = sourceName;
+
+        const tableContainer = document.getElementById("tableContainer");
+        const toolbar = document.getElementById("toolbar");
+        
+        toolbar.style.display = "none";
+        tableContainer.innerHTML = `<div class="status-msg"><div class="spinner"></div><span>Sinkronisasi data ${sourceName}...</span></div>`;
+
+        document.getElementById('searchInput').value = '';
+        document.getElementById('dateStart').value = '';
+        document.getElementById('dateEnd').value = '';
+        currentSortCol = -1;
+
+        try {
+            let res = await fetch(`${URL_API}?source=${encodeURIComponent(sourceName)}`);
+            let data = await res.json();
+
+            if (data.error) {
+                tableContainer.innerHTML = `<div class="status-msg" style="color:#ef4444;">Gagal: ${data.error}</div>`;
+                return;
+            }
+
+            if (!data.rows || data.rows.length === 0) {
+                tableContainer.innerHTML = `<div class="status-msg">Data pada modul ini masih kosong.</div>`;
+                return;
+            }
+
+            globalHeaders = data.headers;
+            globalRows = data.rows;
+
+            toolbar.style.display = "flex";
+            renderTabel(globalHeaders, globalRows);
+            document.getElementById('rowCount').innerText = `${globalRows.length} Baris Data`;
+
+        } catch (error) {
+            tableContainer.innerHTML = `<div class="status-msg" style="color:#ef4444;">Gagal terhubung ke server database.</div>`;
+        }
     }
-  }
 
-  // 4. FORMAT DATE AND CLOCK (Timestamp / Waktu Lengkap)
-  if (hLower.includes("timestamp")) {
-    var dFull = parseToDate(val);
-    if (dFull) {
-      return formatDateID(dFull) + ", " + String(dFull.getHours()).padStart(2, '0') + "." + String(dFull.getMinutes()).padStart(2, '0');
+    // ==========================================
+    // FUNGSI CERDAS FORMAT TANGGAL & JAM (FIX 1899)
+    // ==========================================
+    function formatCellData(headerName, rawValue) {
+        if (rawValue === undefined || rawValue === null || rawValue === '') return '';
+        
+        let headerLower = String(headerName).toLowerCase();
+        let strVal = String(rawValue);
+
+        // Deteksi apakah ini kolom waktu/jam (mengandung kata "waktu" atau "jam")
+        let isTimeColumn = headerLower.includes('waktu') || headerLower.includes('jam');
+        // Deteksi apakah ini kolom tanggal (mengandung kata "tanggal")
+        let isDateColumn = headerLower.includes('tanggal');
+
+        // Cek apakah data mentah berbentuk format ISO Date dari Google Sheet/Forms
+        let isIsoDate = strVal.match(/^\d{4}-\d{2}-\d{2}T/);
+
+        if (isIsoDate) {
+            let dateObj = new Date(strVal);
+            if (!isNaN(dateObj.getTime())) {
+                // Jika kolomnya khusus Jam (biasanya Google Sheets set tanggal default ke 1899-12-30)
+                if (isTimeColumn) {
+                    let hours = String(dateObj.getHours()).padStart(2, '0');
+                    let minutes = String(dateObj.getMinutes()).padStart(2, '0');
+                    return `${hours}.${minutes}`;
+                }
+                
+                // Jika kolomnya khusus Tanggal (tampilkan tanggal bulan tahun saja, tanpa jam 00.00)
+                if (isDateColumn) {
+                    return dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                }
+
+                // Default timestamp lengkap jika bukan keduanya
+                return dateObj.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+            }
+        }
+
+        // Handle khusus jika data string mentah dari sheet mengandung "1899-12-30" (Format waktu bawaan G-Form)
+        if (isTimeColumn && strVal.includes('1899')) {
+            let parts = strVal.split(',');
+            if (parts.length > 1) {
+                return parts[1].trim(); // Ambil bagian jamnya saja
+            }
+            let timeMatch = strVal.match(/\d{2}:\d{2}/);
+            if (timeMatch) return timeMatch[0].replace(':', '.');
+        }
+
+        return strVal;
     }
-  }
 
-  // 5. FORMAT MONTH (Periode Bulan)
-  if (hLower.includes("periode")) {
-    var dMonth = parseToDate(val);
-    if (dMonth) {
-      var monthsFull = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-      return monthsFull[dMonth.getMonth()] + " " + dMonth.getFullYear();
+    function renderTabel(headers, barisData) {
+        const tableContainer = document.getElementById("tableContainer");
+        
+        let html = `<table><thead><tr>`;
+        
+        // Header Checkbox Master
+        html += `<th style="width: 40px; text-align: center;">
+                    <div style="margin-bottom: 6px;">Cetak</div>
+                    <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)" title="Pilih Semua Baris">
+                 </th>`;
+        
+        // Header Kolom + Fitur Sort + Checkbox Print Kolom
+        headers.forEach((header, index) => { 
+            html += `<th>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                            <div class="cell-content header-sort" style="-webkit-line-clamp: 2; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-grow: 1;" title="Klik untuk mengurutkan data" onclick="sortTable(${index}, this)">
+                                ${header} 
+                                <span class="sort-icon" style="color:#94a3b8; font-size:10px; flex-shrink: 0;">⇅</span>
+                            </div>
+                            <input type="checkbox" class="col-print-chk" data-colindex="${index}" checked title="Centang agar kolom ini ikut di-print">
+                        </div>
+                        <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter..." oninput="terapkanFilter()">
+                     </th>`; 
+        });
+        html += `</tr></thead><tbody id="tabelBody">`;
+
+        // Render Baris Data
+        barisData.forEach((row, originalIndex) => {
+            html += `<tr id="row_${originalIndex}">`;
+            
+            // Checkbox Baris
+            html += `<td style="text-align: center;">
+                        <input type="checkbox" class="chk-box row-chk" onchange="highlightRow(this)">
+                     </td>`;
+                     
+            row.forEach((cell, colIndex) => {
+                let rawCell = cell !== undefined && cell !== null ? cell : '';
+                let headerName = headers[colIndex];
+                
+                // Cek URL Berkas
+                if (typeof rawCell === 'string' && (rawCell.startsWith('http://') || rawCell.startsWith('https://'))) {
+                    let formattedCell = `<a href="${rawCell}" target="_blank" class="btn-link">Buka Berkas ↗</a>`;
+                    html += `<td><div class="cell-content" title="${rawCell}">${formattedCell}</div></td>`;
+                } else {
+                    // Gunakan fungsi pembersih format tanggal & jam
+                    let cleanVal = formatCellData(headerName, rawCell);
+                    html += `<td><div class="cell-content" title="${String(cleanVal).replace(/<[^>]*>?/gm, '')}">${cleanVal}</div></td>`;
+                }
+            });
+            html += `</tr>`;
+        });
+
+        html += `</tbody></table>`;
+        tableContainer.innerHTML = html;
+
+        initResizableColumns();
     }
-  }
 
-  // Fallback umum untuk data tanggal/waktu lain yang lolos
-  if (val instanceof Date || (strVal.match(/^\d{4}-\d{2}-\d{2}/) && !hLower.includes("nomor"))) {
-    var dGen = parseToDate(val);
-    if (dGen) {
-      return formatDateID(dGen);
+    // ==========================================
+    // SCRIPT SORTING
+    // ==========================================
+    function sortTable(colIndex, headerElement) {
+        const tbody = document.getElementById('tabelBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        if (currentSortCol === colIndex) {
+            currentSortAsc = !currentSortAsc;
+        } else {
+            currentSortCol = colIndex;
+            currentSortAsc = true;
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.innerHTML = '⇅';
+                icon.style.color = '#94a3b8';
+            });
+        }
+
+        const currentIcon = headerElement.querySelector('.sort-icon');
+        currentIcon.innerHTML = currentSortAsc ? '▲' : '▼';
+        currentIcon.style.color = 'var(--primary-blue)';
+
+        rows.sort((a, b) => {
+            let valA = a.cells[colIndex + 1].innerText.trim();
+            let valB = b.cells[colIndex + 1].innerText.trim();
+
+            let dA = new Date(valA);
+            let dB = new Date(valB);
+            let isDate = (dA.toString() !== 'Invalid Date' && dB.toString() !== 'Invalid Date' && valA.length > 6 && valB.length > 6 && isNaN(valA));
+
+            let comparison = 0;
+            if (isDate) {
+                comparison = dA.getTime() - dB.getTime();
+            } else {
+                comparison = valA.localeCompare(valB, 'id', { numeric: true, sensitivity: 'base' });
+            }
+
+            return currentSortAsc ? comparison : -comparison;
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
     }
-  }
 
-  return strVal;
-}
+    // ==========================================
+    // RESIZABLE COLUMNS
+    // ==========================================
+    function initResizableColumns() {
+        const table = document.querySelector('table');
+        const cols = document.querySelectorAll('th');
+        
+        cols.forEach(col => {
+            col.style.width = `${col.offsetWidth}px`;
+        });
+        
+        table.style.tableLayout = 'fixed';
+        table.style.width = 'max-content'; 
+        table.style.minWidth = '100%';
 
-function parseToDate(val) {
-  if (val instanceof Date) return val;
-  var parsed = new Date(val);
-  if (!isNaN(parsed.getTime())) return parsed;
-  return null;
-}
+        cols.forEach(col => {
+            const resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            col.appendChild(resizer);
+            
+            let x = 0;
+            let w = 0;
 
-function formatDateID(dateObj) {
-  var d = String(dateObj.getDate()).padStart(2, '0');
-  var months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-  var m = months[dateObj.getMonth()];
-  var y = dateObj.getFullYear();
-  return d + " " + m + " " + y;
-}
+            const mouseDownHandler = function (e) {
+                document.body.style.userSelect = 'none';
+                x = e.clientX;
+                w = col.offsetWidth;
+
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+                resizer.classList.add('resizing');
+            };
+
+            const mouseMoveHandler = function (e) {
+                const dx = e.clientX - x;
+                let newWidth = w + dx;
+                if (newWidth < 100) newWidth = 100; 
+                col.style.width = `${newWidth}px`;
+            };
+
+            const mouseUpHandler = function () {
+                document.body.style.userSelect = ''; 
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+                resizer.classList.remove('resizing');
+            };
+
+            resizer.addEventListener('mousedown', mouseDownHandler);
+        });
+    }
+
+    function highlightRow(checkbox) {
+        let tr = checkbox.closest('tr');
+        if (checkbox.checked) {
+            tr.classList.add('selected');
+        } else {
+            tr.classList.remove('selected');
+        }
+    }
+
+    function toggleCheckAll(masterCheckbox) {
+        let visibleRows = document.querySelectorAll('#tabelBody tr:not([style*="display: none"])');
+        visibleRows.forEach(tr => {
+            let chk = tr.querySelector('.row-chk');
+            chk.checked = masterCheckbox.checked;
+            highlightRow(chk);
+        });
+    }
+
+    function terapkanFilter() {
+        let globalCari = document.getElementById('searchInput').value.toLowerCase();
+        let dateStart = document.getElementById('dateStart').value;
+        let dateEnd = document.getElementById('dateEnd').value;
+        
+        let dStart = dateStart ? new Date(dateStart) : null;
+        let dEnd = dateEnd ? new Date(dateEnd) : null;
+        if (dStart) dStart.setHours(0, 0, 0, 0);
+        if (dEnd) dEnd.setHours(23, 59, 59, 999);
+
+        let colFilters = Array.from(document.querySelectorAll('.col-filter-input')).map(input => {
+            return { index: parseInt(input.getAttribute('data-colindex')), keyword: input.value.toLowerCase() };
+        }).filter(f => f.keyword !== "");
+
+        let trs = document.querySelectorAll('#tabelBody tr');
+        let countVisible = 0;
+
+        trs.forEach((tr, index) => {
+            let rowData = globalRows[index];
+            let teksBaris = rowData.join(" ").toLowerCase();
+            
+            let lolosGlobal = teksBaris.includes(globalCari);
+
+            let lolosTgl = true;
+            if (dStart || dEnd) {
+                let cellTanggal = new Date(rowData[0]); 
+                if (!isNaN(cellTanggal.getTime())) {
+                    if (dStart && cellTanggal < dStart) lolosTgl = false;
+                    if (dEnd && cellTanggal > dEnd) lolosTgl = false;
+                }
+            }
+
+            let lolosCol = true;
+            for (let f of colFilters) {
+                let cellData = rowData[f.index] !== undefined && rowData[f.index] !== null ? String(rowData[f.index]).toLowerCase() : "";
+                if (!cellData.includes(f.keyword)) {
+                    lolosCol = false;
+                    break;
+                }
+            }
+
+            if (lolosGlobal && lolosTgl && lolosCol) {
+                tr.style.display = "";
+                countVisible++;
+            } else {
+                tr.style.display = "none";
+                let chk = tr.querySelector('.row-chk');
+                if(chk.checked) {
+                    chk.checked = false;
+                    highlightRow(chk);
+                }
+            }
+        });
+        
+        document.getElementById('rowCount').innerText = `${countVisible} Baris Data`;
+        document.getElementById('chkAll').checked = false;
+    }
+
+    function cetakData() {
+        let checkedBoxes = document.querySelectorAll('.row-chk:checked');
+        if (checkedBoxes.length === 0) {
+            return alert("Pilih minimal satu baris data untuk dicetak.");
+        }
+
+        let checkedCols = Array.from(document.querySelectorAll('.col-print-chk:checked')).map(chk => parseInt(chk.getAttribute('data-colindex')));
+        
+        if (checkedCols.length === 0) {
+            return alert("Pilih minimal satu kolom untuk dicetak melalui checkbox di header tabel.");
+        }
+
+        let printWindow = window.open('', '_blank');
+        
+        let printHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Print Document - ${currentModule}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #1e293b; padding: 20px; }
+                    h2 { text-align: center; color: #0f172a; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+                    .print-date { text-align: center; margin-bottom: 25px; color: #64748b; font-size: 12px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; vertical-align: top; word-wrap: break-word; }
+                    th { background-color: #f8fafc; font-weight: 700; color: #334155; }
+                    @media print { @page { size: landscape; margin: 15mm; } }
+                </style>
+            </head>
+            <body>
+                <h2>Dokumen Laporan Operasional</h2>
+                <div class="print-date">Modul: <strong>${currentModule}</strong> &nbsp;|&nbsp; Dicetak: ${new Date().toLocaleString('id-ID')}</div>
+                <table>
+                    <thead><tr>
+        `;
+
+        checkedCols.forEach(colIndex => {
+            printHtml += `<th>${globalHeaders[colIndex]}</th>`;
+        });
+        printHtml += `</tr></thead><tbody>`;
+
+        checkedBoxes.forEach(chk => {
+            let tr = chk.closest('tr');
+            printHtml += `<tr>`;
+            
+            checkedCols.forEach(colIndex => {
+                let td = tr.cells[colIndex + 1]; 
+                let cellDiv = td.querySelector('.cell-content');
+                let cellContent = cellDiv ? cellDiv.innerHTML : td.innerHTML;
+
+                if(cellContent.includes('<a href=')) {
+                    let hrefMatch = cellContent.match(/href="([^"]*)"/);
+                    if(hrefMatch && hrefMatch[1]) {
+                        cellContent = `<span style="word-break: break-all; color: #297ec6; text-decoration: underline;">${hrefMatch[1]}</span>`;
+                    }
+                }
+                printHtml += `<td>${cellContent}</td>`;
+            });
+            printHtml += `</tr>`;
+        });
+
+        printHtml += `
+                    </tbody>
+                </table>
+                <script> window.onload = function() { window.print(); }; <\/script>
+            </body>
+            </html>
+        `;
+
+        printWindow.document.write(printHtml);
+        printWindow.document.close();
+    }
+</script>
+
+</body>
+</html>

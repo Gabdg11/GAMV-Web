@@ -4,255 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enterprise Dashboard System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            blue: '#297ec6',
+                            yellow: '#ffde17',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        :root {
-            --primary-blue: #297ec6;
-            --primary-yellow: #ffde17;
-            --bg-color: #f4f7f9;
-            --text-main: #1e293b;
-        }
-        
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            font-family: 'Inter', 'Segoe UI', sans-serif; 
-            background: var(--bg-color); color: var(--text-main); overflow: hidden; 
-            display: flex; flex-direction: column;
-        }
-
-        ::-webkit-scrollbar { width: 8px; height: 10px; }
-        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        .top-nav {
-            background: #ffffff; border-bottom: 1px solid #e2e8f0;
-            padding: 12px 20px; display: flex; gap: 10px;
-            overflow-x: auto; white-space: nowrap;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05); flex-shrink: 0;
-            align-items: center;
-        }
-        .brand-title {
-            font-weight: 700; font-size: 15px; color: var(--primary-blue); 
-            margin-right: 20px; border-right: 2px solid #e2e8f0; padding-right: 20px;
-            letter-spacing: 0.5px;
-        }
-        .nav-btn {
-            background: #ffffff; border: 1px solid #e2e8f0; padding: 8px 14px;
-            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
-            color: #475569; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
-        }
-        .nav-btn:hover { background: #fffdf0; border-color: var(--primary-yellow); color: var(--text-main); }
-        .nav-btn.active { background: var(--primary-blue); color: #ffffff; border-color: var(--primary-blue); box-shadow: 0 2px 4px rgba(41, 126, 198, 0.2); }
-
-        .toolbar {
-            padding: 12px 20px; background: #ffffff; border-bottom: 1px solid #e2e8f0;
-            display: flex; gap: 12px; flex-wrap: wrap; align-items: center; flex-shrink: 0;
-        }
-        .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #475569; }
-        
-        .toolbar select, .toolbar input[type="text"], .toolbar input[type="date"] {
-            padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
-            font-size: 13px; outline: none; transition: 0.2s; color: var(--text-main); background: #fff;
-        }
-        .toolbar select:focus, .toolbar input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(41, 126, 198, 0.15); }
-        .search-box { flex-grow: 1; max-width: 280px; }
-        
-        .btn-action {
-            color: var(--text-main); border: none; padding: 8px 16px;
-            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700;
-            display: flex; align-items: center; gap: 6px; transition: 0.2s;
-        }
-        .btn-pdf { background: #ef4444; color: white; margin-left: auto; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3); }
-        .btn-pdf:hover { background: #dc2626; transform: translateY(-1px); }
-        
-        .btn-excel { background: #10b981; color: white; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3); }
-        .btn-excel:hover { background: #059669; transform: translateY(-1px); }
-
-        .table-container {
-            flex-grow: 1; overflow: auto; background: #ffffff; position: relative;
-        }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        
-        th, td { 
-            padding: 10px 15px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;
-            font-size: 13px; text-align: left; vertical-align: top;
-        }
-        
-        .cell-content {
-            white-space: normal;
-            word-wrap: break-word;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 4; 
-            -webkit-box-orient: vertical;
-        }
-
-        th {
-            background-color: #f8fafc; color: #334155; position: sticky; top: 0;
-            z-index: 20; font-weight: 600; border-top: 1px solid #e2e8f0; border-bottom: 2px solid #cbd5e1;
-            background-clip: padding-box;
-        }
         
         .resizer {
             position: absolute; right: 0; top: 0; width: 5px; height: 100%;
             cursor: col-resize; user-select: none; z-index: 21;
         }
-        .resizer:hover, .resizing { border-right: 2px solid var(--primary-blue); background: rgba(41, 126, 198, 0.1); }
-
-        tr:hover td { background-color: #f4f9fd; }
-        tr.selected td { background-color: #eaf3fa; }
-        td:first-child, th:first-child { border-left: 1px solid #e2e8f0; }
-
-        .btn-link {
-            display: inline-block; background: var(--primary-blue); color: #ffffff; padding: 4px 10px;
-            border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s;
-        }
-        .btn-link:hover { background: var(--primary-yellow); color: var(--text-main); }
-
-        .status-msg { padding: 40px 20px; text-align: center; color: #64748b; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; height: 100%; }
-        .spinner { width: 30px; height: 30px; border: 3px solid #f1f5f9; border-top: 3px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .chk-box { cursor: pointer; width: 16px; height: 16px; accent-color: var(--primary-blue); }
-        .col-print-chk { cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary-blue); flex-shrink: 0; margin-top: 3px; }
-        .header-sort:hover { color: var(--primary-blue); }
-        
-        .btn-hide-col {
-            background: #ef4444; color: white; border: none; padding: 2px 6px; border-radius: 4px;
-            font-size: 10px; cursor: pointer; font-weight: 600; transition: 0.2s; margin-top: 2px;
-        }
-        .btn-hide-col:hover { background: #dc2626; }
-
-        .hidden-cols-bar {
-            padding: 8px 20px; background: #e2e8f0; font-size: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; display: none;
-        }
-        .unhide-pill {
-            background: #ffffff; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--primary-blue);
-        }
-        .unhide-pill:hover { background: var(--primary-blue); color: white; }
-
-        /* =========================================
-           POPUP FILTER SPREADSHEET STYLE
-           ========================================= */
-        .filter-icon {
-            cursor: pointer; color: #94a3b8; font-size: 12px; padding: 2px; border-radius: 4px; transition: 0.2s;
-        }
-        .filter-icon:hover, .filter-icon.active { background: #e2e8f0; color: var(--primary-blue); }
-        
-        .filter-popup {
-            position: absolute; background: white; border: 1px solid #cbd5e1; border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 220px; z-index: 1000;
-            display: none; flex-direction: column; font-size: 12px;
-        }
-        .filter-popup-search {
-            padding: 8px; border-bottom: 1px solid #e2e8f0;
-        }
-        .filter-popup-search input {
-            width: 100%; box-sizing: border-box; padding: 6px; border: 1px solid #cbd5e1;
-            border-radius: 4px; outline: none; font-size: 12px;
-        }
-        .filter-popup-search input:focus { border-color: var(--primary-blue); }
-        .filter-popup-actions {
-            padding: 6px 8px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;
-            display: flex; justify-content: space-between; font-weight: 500;
-        }
-        .filter-popup-actions a { color: var(--primary-blue); text-decoration: none; cursor: pointer; }
-        .filter-popup-actions a:hover { text-decoration: underline; }
-        
-        .filter-popup-list {
-            max-height: 200px; overflow-y: auto; padding: 6px 0;
-        }
-        .filter-item {
-            padding: 4px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;
-        }
-        .filter-item:hover { background: #f1f5f9; }
-        .filter-item input { cursor: pointer; accent-color: var(--primary-blue); }
-        .filter-item label { cursor: pointer; user-select: none; flex-grow: 1; word-break: break-all; }
-        
-        .filter-popup-footer {
-            padding: 8px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc;
-        }
-        .filter-popup-footer button {
-            padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font-weight: 600; transition: 0.2s;
-        }
-        .filter-popup-footer button:hover { background: #f1f5f9; }
-        .filter-popup-footer .btn-oke { background: #15803d; color: white; border: none; }
-        .filter-popup-footer .btn-oke:hover { background: #166534; }
+        .resizer:hover, .resizing { border-right: 2px solid #297ec6; background: rgba(41, 126, 198, 0.1); }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden">
 
-    <!-- 1. NAVIGATION BAR -->
-    <nav class="top-nav">
-        <div class="brand-title">DASHBOARD GA-CM</div>
-        <button class="nav-btn" onclick="tarikData('UTILITIES USAGE - GENERAL AFFAIRS', this)">⚡ Utilities</button>
-        <button class="nav-btn" onclick="tarikData('MONTHLY PROJECT REPORT', this)">📊 Project</button>
-        <button class="nav-btn" onclick="tarikData('Laporan Insiden BCP', this)">🚨 Insiden</button>
-        <button class="nav-btn" onclick="tarikData('FORM DATA TAMU / VISITOR', this)">👥 Tamu/Visitor</button>
-        <button class="nav-btn" onclick="tarikData('FORM PEMINJAMAN KENDARAAN DINAS & VISITOR', this)">🚗 Kendaraan</button>
-        <button class="nav-btn" onclick="tarikData('Pengambilan Barang (Office Supplies)', this)">📦 Supplies</button>
+    <!-- 1. TOP NAVIGATION BAR -->
+    <nav class="bg-white border-b border-slate-200 px-5 py-3 flex items-center gap-3 overflow-x-auto whitespace-nowrap shadow-sm shrink-0">
+        <div class="font-bold text-sm text-primary-blue mr-4 border-r-2 border-slate-200 pr-4 tracking-wide">DASHBOARD GA-CM</div>
+        <button class="nav-btn bg-white border border-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-amber-50 hover:border-primary-yellow hover:text-slate-900 transition flex items-center gap-1.5" onclick="tarikData('UTILITIES USAGE - GENERAL AFFAIRS', this)">⚡ Utilities</button>
+        <button class="nav-btn bg-white border border-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-amber-50 hover:border-primary-yellow hover:text-slate-900 transition flex items-center gap-1.5" onclick="tarikData('MONTHLY PROJECT REPORT', this)">📊 Project</button>
+        <button class="nav-btn bg-white border border-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-amber-50 hover:border-primary-yellow hover:text-slate-900 transition flex items-center gap-1.5" onclick="tarikData('Laporan Insiden BCP', this)">🚨 Insiden</button>
+        <button class="nav-btn bg-white border border-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-amber-50 hover:border-primary-yellow hover:text-slate-900 transition flex items-center gap-1.5" onclick="tarikData('FORM DATA TAMU / VISITOR', this)">👥 Tamu/Visitor</button>
+        <button class="nav-btn bg-white border border-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-amber-50 hover:border-primary-yellow hover:text-slate-900 transition flex items-center gap-1.5" onclick="tarikData('FORM PEMINJAMAN KENDARAAN DINAS & VISITOR', this)">🚗 Kendaraan</button>
+        <button class="nav-btn bg-white border border-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-amber-50 hover:border-primary-yellow hover:text-slate-900 transition flex items-center gap-1.5" onclick="tarikData('Pengambilan Barang (Office Supplies)', this)">📦 Supplies</button>
     </nav>
 
-    <!-- 2. TOOLBAR FILTERING & PRINT -->
-    <div class="toolbar" id="toolbar" style="display: none;">
-        <div class="filter-group">
+    <!-- 2. TOOLBAR FILTERING & EXPORT -->
+    <div class="bg-white border-b border-slate-200 px-5 py-3 flex flex-wrap items-center gap-3 shrink-0" id="toolbar" style="display: none;">
+        <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
             <label>Mode Cari:</label>
-            <select id="filterMode" onchange="gantiModeFilter()">
+            <select id="filterMode" class="bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-primary-blue focus:ring-2 focus:ring-primary-blue/20 transition" onchange="gantiModeFilter()">
                 <option value="global">Cari Teks Bebas</option>
                 <option value="dateRange">Rentang Tanggal</option>
             </select>
         </div>
 
-        <div class="filter-group" id="groupSearch">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Ketik kata kunci..." oninput="terapkanFilterGlobal()">
+        <div class="flex items-center gap-2" id="groupSearch">
+            <input type="text" id="searchInput" class="bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-primary-blue focus:ring-2 focus:ring-primary-blue/20 transition w-64" placeholder="🔍 Ketik kata kunci..." oninput="terapkanFilterGlobal()">
         </div>
 
-        <div class="filter-group" id="groupDateStart" style="display: none;">
+        <div class="flex items-center gap-2 text-xs font-medium text-slate-600" id="groupDateStart" style="display: none;">
             <label>Mulai:</label>
-            <input type="date" id="dateStart" onchange="terapkanFilterGlobal()">
+            <input type="date" id="dateStart" class="bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-primary-blue" onchange="terapkanFilterGlobal()">
         </div>
-        <div class="filter-group" id="groupDateEnd" style="display: none;">
+        <div class="flex items-center gap-2 text-xs font-medium text-slate-600" id="groupDateEnd" style="display: none;">
             <label>Akhir:</label>
-            <input type="date" id="dateEnd" onchange="terapkanFilterGlobal()">
+            <input type="date" id="dateEnd" class="bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-primary-blue" onchange="terapkanFilterGlobal()">
         </div>
         
-        <span id="rowCount" style="font-size: 13px; font-weight:600; color: #475569; margin-left: 10px; background: #eaf3fa; color: var(--primary-blue); padding: 6px 12px; border-radius: 20px;"></span>
+        <span id="rowCount" class="text-xs font-bold text-primary-blue bg-blue-50 px-3 py-1.5 rounded-full ml-2"></span>
         
-        <!-- Tombol Ekspor Dual -->
-        <button class="btn-action btn-pdf" onclick="eksporPDF()">📄 PDF</button>
-        <button class="btn-action btn-excel" onclick="eksporExcel()">📊 Excel</button>
+        <div class="ml-auto flex items-center gap-2">
+            <button class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs shadow-sm transition flex items-center gap-1" onclick="eksporPDF()">📄 PDF</button>
+            <button class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs shadow-sm transition flex items-center gap-1" onclick="eksporExcel()">📊 Excel</button>
+        </div>
     </div>
 
     <!-- Panel Kolom Tersembunyi -->
-    <div class="hidden-cols-bar" id="hiddenColsBar">
-        <span style="font-weight: 600; color: #475569;">Kolom disembunyikan:</span>
-        <div id="hiddenColsList" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+    <div class="bg-slate-200 px-5 py-2 text-xs flex items-center gap-2 flex-wrap shrink-0" id="hiddenColsBar" style="display: none;">
+        <span class="font-semibold text-slate-600">Kolom disembunyikan:</span>
+        <div id="hiddenColsList" class="flex gap-1.5 flex-wrap"></div>
     </div>
 
     <!-- 3. AREA TABEL DATA -->
-    <div class="table-container" id="tableContainer">
-        <div class="status-msg">
-            <svg style="width: 48px; height: 48px; color: #cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            <span>Silakan pilih modul di menu atas untuk menampilkan database.</span>
+    <div class="flex-grow overflow-auto bg-white relative" id="tableContainer">
+        <div class="flex flex-col items-center justify-center h-full text-slate-400 gap-3 p-6 text-center">
+            <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span class="text-sm font-medium">Silakan pilih modul di menu atas untuk menampilkan database.</span>
         </div>
     </div>
 
-    <!-- Elemen Popup Filter (Tersembunyi) -->
-    <div id="filterPopup" class="filter-popup">
-        <div class="filter-popup-search">
-            <input type="text" id="popupSearchInput" placeholder="Cari filter..." oninput="cariItemPopup()">
+    <!-- Pop-up Filter Spreadsheet Style -->
+    <div id="filterPopup" class="absolute bg-white border border-slate-300 rounded-lg shadow-xl w-56 z-50 hidden flex-col text-xs">
+        <div class="p-2 border-b border-slate-200">
+            <input type="text" id="popupSearchInput" class="w-full px-2.5 py-1 border border-slate-300 rounded outline-none focus:border-primary-blue text-xs" placeholder="Cari filter..." oninput="cariItemPopup()">
         </div>
-        <div class="filter-popup-actions">
-            <a onclick="cekSemuaPopup(true)">Pilih Semua</a>
-            <a onclick="cekSemuaPopup(false)">Bersihkan</a>
+        <div class="px-3 py-1.5 bg-slate-50 border-b border-slate-200 flex justify-between font-medium text-primary-blue">
+            <a class="cursor-pointer hover:underline" onclick="cekSemuaPopup(true)">Pilih Semua</a>
+            <a class="cursor-pointer hover:underline text-slate-500" onclick="cekSemuaPopup(false)">Bersihkan</a>
         </div>
-        <div class="filter-popup-list" id="popupListContainer"></div>
-        <div class="filter-popup-footer">
-            <button onclick="tutupPopup()">Batal</button>
-            <button class="btn-oke" onclick="terapkanPopup()">Oke</button>
+        <div class="max-h-48 overflow-y-auto py-1" id="popupListContainer"></div>
+        <div class="p-2 border-t border-slate-200 bg-slate-50 flex justify-end gap-2">
+            <button class="px-3 py-1 rounded border border-slate-300 bg-white hover:bg-slate-100 font-semibold text-slate-700 transition" onclick="tutupPopup()">Batal</button>
+            <button class="px-3 py-1 rounded bg-emerald-700 hover:bg-emerald-800 text-white font-semibold transition" onclick="terapkanPopup()">Oke</button>
         </div>
     </div>
 
@@ -266,12 +119,9 @@
     let currentSortCol = -1;
     let currentSortAsc = true;
     let hiddenColumns = new Set();
-    
-    // Objek penyimpan status filter kolom aktif { colIndex: ["nilai1", "nilai2"] }
     let activeColFilters = {};
     let popupActiveColIndex = -1;
 
-    // Klik di luar popup akan menutup popup
     document.addEventListener('click', function(event) {
         let popup = document.getElementById('filterPopup');
         if (popup.style.display === 'flex' && !popup.contains(event.target) && !event.target.classList.contains('filter-icon')) {
@@ -280,21 +130,22 @@
     });
 
     async function tarikData(sourceName, elemenDiklik) {
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        elemenDiklik.classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-primary-blue', 'text-white', 'shadow'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.add('bg-white', 'text-slate-600'));
+        elemenDiklik.classList.remove('bg-white', 'text-slate-600');
+        elemenDiklik.classList.add('bg-primary-blue', 'text-white', 'shadow');
+        
         currentModule = sourceName;
-
         const tableContainer = document.getElementById("tableContainer");
         const toolbar = document.getElementById("toolbar");
         
         toolbar.style.display = "none";
         document.getElementById('hiddenColsBar').style.display = "none";
-        tableContainer.innerHTML = `<div class="status-msg"><div class="spinner"></div><span>Sinkronisasi data ${sourceName}...</span></div>`;
+        tableContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-500 gap-3"><div class="w-8 h-8 border-3 border-slate-200 border-t-primary-blue rounded-full animate-spin"></div><span class="text-sm font-medium">Sinkronisasi data ${sourceName}...</span></div>`;
 
         document.getElementById('searchInput').value = '';
         document.getElementById('dateStart').value = '';
         document.getElementById('dateEnd').value = '';
-        
         currentSortCol = -1;
         hiddenColumns.clear();
         activeColFilters = {};
@@ -305,12 +156,12 @@
             let data = await res.json();
 
             if (data.error) {
-                tableContainer.innerHTML = `<div class="status-msg" style="color:#ef4444;">Gagal: ${data.error}</div>`;
+                tableContainer.innerHTML = `<div class="p-10 text-center text-rose-500 font-semibold">Gagal: ${data.error}</div>`;
                 return;
             }
 
             if (!data.rows || data.rows.length === 0) {
-                tableContainer.innerHTML = `<div class="status-msg">Data pada modul ini masih kosong.</div>`;
+                tableContainer.innerHTML = `<div class="p-10 text-center text-slate-500 font-medium">Data pada modul ini masih kosong.</div>`;
                 return;
             }
 
@@ -322,7 +173,7 @@
             updateRowCount();
 
         } catch (error) {
-            tableContainer.innerHTML = `<div class="status-msg" style="color:#ef4444;">Gagal terhubung ke server database.</div>`;
+            tableContainer.innerHTML = `<div class="p-10 text-center text-rose-500 font-semibold">Gagal terhubung ke server database.</div>`;
         }
     }
 
@@ -352,44 +203,42 @@
         
         if (hiddenColumns.size > 0) {
             hiddenBar.style.display = "flex";
-            hiddenList.innerHTML = Array.from(hiddenColumns).map(idx => `<span class="unhide-pill" onclick="showColumn(${idx})">➕ ${headers[idx]}</span>`).join('');
+            hiddenList.innerHTML = Array.from(hiddenColumns).map(idx => `<span class="bg-white border border-slate-300 px-2.5 py-0.5 rounded-full cursor-pointer font-semibold text-primary-blue hover:bg-primary-blue hover:text-white transition shadow-sm" onclick="showColumn(${idx})">➕ ${headers[idx]}</span>`).join('');
         } else {
             hiddenBar.style.display = "none";
         }
 
-        let html = `<table><thead><tr>`;
-        html += `<th style="width: 40px; text-align: center;">
-                    <div style="margin-bottom: 6px;">Pilih</div>
-                    <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)" title="Pilih Semua Baris">
+        let html = `<table class="w-full border-collapse"><thead><tr>`;
+        html += `<th class="bg-slate-50 border-b-2 border-slate-300 border-r border-slate-200 px-3 py-2.5 text-center sticky top-0 z-20 w-12">
+                    <div class="mb-1 text-[11px] font-bold text-slate-600">Pilih</div>
+                    <input type="checkbox" id="chkAll" class="w-4 h-4 accent-primary-blue cursor-pointer" onchange="toggleCheckAll(this)" title="Pilih Semua">
                  </th>`;
         
         headers.forEach((header, index) => { 
             let isHidden = hiddenColumns.has(index);
             let displayStyle = isHidden ? "display: none;" : "";
-            let filterActiveCls = activeColFilters[index] ? "active" : "";
+            let filterActiveCls = activeColFilters[index] ? "text-primary-blue font-bold bg-blue-50" : "text-slate-400";
 
-            html += `<th style="${displayStyle}" data-colindex="${index}">
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-                                <div class="cell-content header-sort" style="-webkit-line-clamp: 2; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-grow: 1;" title="Klik urutkan" onclick="sortTable(${index}, this)">
-                                    ${header} <span class="sort-icon" style="color:#94a3b8; font-size:10px; flex-shrink:0;">⇅</span>
+            html += `<th class="bg-slate-50 border-b-2 border-slate-300 border-r border-slate-200 px-3 py-2.5 sticky top-0 z-20 font-semibold text-slate-700 text-left" style="${displayStyle}" data-colindex="${index}">
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="line-clamp-2 cursor-pointer flex items-center gap-1 flex-grow hover:text-primary-blue transition" title="Klik untuk mengurutkan" onclick="sortTable(${index}, this)">
+                                    ${header} <span class="sort-icon text-[10px] text-slate-400 shrink-0">⇅</span>
                                 </div>
-                                <div style="display: flex; gap: 4px; align-items: center;">
-                                    <span class="filter-icon ${filterActiveCls}" onclick="bukaPopup(event, ${index})" title="Filter Kolom">▼</span>
-                                </div>
+                                <span class="filter-icon cursor-pointer text-xs p-0.5 rounded transition ${filterActiveCls}" onclick="bukaPopup(event, ${index})" title="Filter Kolom">▼</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <button class="btn-hide-col" onclick="hideColumn(${index})">Hide</button>
-                                <input type="checkbox" class="col-print-chk" data-colindex="${index}" checked title="Centang untuk Ekspor">
+                            <div class="flex justify-between items-center mt-1">
+                                <button class="bg-rose-500 hover:bg-rose-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold transition shadow-sm" onclick="hideColumn(${index})">Hide</button>
+                                <input type="checkbox" class="col-print-chk w-3.5 h-3.5 accent-primary-blue cursor-pointer" data-colindex="${index}" checked title="Centang untuk Ekspor">
                             </div>
                         </div>
                      </th>`; 
         });
-        html += `</tr></thead><tbody id="tabelBody">`;
+        html += `</tr></thead><tbody id="tabelBody" class="divide-y divide-slate-200">`;
 
         barisData.forEach((row, originalIndex) => {
-            html += `<tr id="row_${originalIndex}">`;
-            html += `<td style="text-align: center;"><input type="checkbox" class="chk-box row-chk" onchange="highlightRow(this)"></td>`;
+            html += `<tr id="row_${originalIndex}" class="hover:bg-sky-50/60 transition">`;
+            html += `<td class="border-r border-slate-200 px-3 py-2.5 text-center"><input type="checkbox" class="row-chk w-4 h-4 accent-primary-blue cursor-pointer" onchange="highlightRow(this)"></td>`;
                      
             row.forEach((cell, colIndex) => {
                 let isHidden = hiddenColumns.has(colIndex);
@@ -397,9 +246,9 @@
                 let rawCell = cell !== undefined && cell !== null ? cell : '';
                 
                 if (typeof rawCell === 'string' && (rawCell.startsWith('http://') || rawCell.startsWith('https://'))) {
-                    html += `<td style="${displayStyle}" data-colindex="${colIndex}"><div class="cell-content" title="${rawCell}"><a href="${rawCell}" target="_blank" class="btn-link">Berkas ↗</a></div></td>`;
+                    html += `<td class="border-r border-slate-200 px-3 py-2.5 text-xs text-slate-700" style="${displayStyle}" data-colindex="${colIndex}"><div class="line-clamp-4 break-words"><a href="${rawCell}" target="_blank" class="inline-block bg-primary-blue hover:bg-primary-yellow hover:text-slate-900 text-white px-2.5 py-1 rounded font-semibold transition shadow-sm">Berkas ↗</a></div></td>`;
                 } else {
-                    html += `<td style="${displayStyle}" data-colindex="${colIndex}"><div class="cell-content" title="${String(rawCell).replace(/<[^>]*>?/gm, '')}">${rawCell}</div></td>`;
+                    html += `<td class="border-r border-slate-200 px-3 py-2.5 text-xs text-slate-700" style="${displayStyle}" data-colindex="${colIndex}"><div class="line-clamp-4 break-words" title="${String(rawCell).replace(/<[^>]*>?/gm, '')}">${rawCell}</div></td>`;
                 }
             });
             html += `</tr>`;
@@ -412,9 +261,6 @@
         terapkanFilterGlobal(); 
     }
 
-    // ==========================================
-    // LOGIKA FILTER POPUP ALA SPREADSHEET
-    // ==========================================
     function bukaPopup(event, colIndex) {
         event.stopPropagation();
         popupActiveColIndex = colIndex;
@@ -424,27 +270,23 @@
         let listContainer = document.getElementById('popupListContainer');
         document.getElementById('popupSearchInput').value = '';
 
-        // Ambil nilai unik dari data master untuk kolom ini
         let uniqueValues = [...new Set(globalRows.map(row => String(row[colIndex] || "").trim()))].sort();
-        
-        // Cek filter yang sudah ada
         let existingFilter = activeColFilters[colIndex] || null;
 
         let listHtml = "";
-        uniqueValues.forEach((val, i) => {
+        uniqueValues.forEach((val) => {
             let isChecked = existingFilter ? existingFilter.includes(val) : true;
             let displayVal = val === "" ? "(Kosong)" : val;
-            listHtml += `<label class="filter-item">
-                            <input type="checkbox" class="popup-item-chk" value="${val}" ${isChecked ? 'checked' : ''}>
-                            <span>${displayVal}</span>
+            listHtml += `<label class="flex items-center gap-2 px-3 py-1 hover:bg-slate-100 cursor-pointer">
+                            <input type="checkbox" class="popup-item-chk w-3.5 h-3.5 accent-primary-blue cursor-pointer" value="${val}" ${isChecked ? 'checked' : ''}>
+                            <span class="break-all text-slate-700">${displayVal}</span>
                          </label>`;
         });
         listContainer.innerHTML = listHtml;
 
-        // Posisi popup
         popup.style.top = (iconRect.bottom + window.scrollY + 5) + "px";
         let leftPos = iconRect.left + window.scrollX;
-        if (leftPos + 220 > window.innerWidth) leftPos = window.innerWidth - 240;
+        if (leftPos + 224 > window.innerWidth) leftPos = window.innerWidth - 240;
         popup.style.left = leftPos + "px";
         popup.style.display = "flex";
     }
@@ -455,40 +297,30 @@
 
     function cariItemPopup() {
         let kw = document.getElementById('popupSearchInput').value.toLowerCase();
-        let items = document.querySelectorAll('.filter-item');
-        items.forEach(item => {
+        document.querySelectorAll('#popupListContainer label').forEach(item => {
             let text = item.querySelector('span').innerText.toLowerCase();
             item.style.display = text.includes(kw) ? "flex" : "none";
         });
     }
 
     function cekSemuaPopup(checkState) {
-        let items = document.querySelectorAll('.filter-item:not([style*="display: none"]) .popup-item-chk');
-        items.forEach(chk => chk.checked = checkState);
+        document.querySelectorAll('#popupListContainer label:not([style*="display: none"]) .popup-item-chk').forEach(chk => chk.checked = checkState);
     }
 
     function terapkanPopup() {
-        let checkedBoxes = document.querySelectorAll('.popup-item-chk:checked');
-        let selectedValues = Array.from(checkedBoxes).map(chk => chk.value);
-        
+        let selectedValues = Array.from(document.querySelectorAll('.popup-item-chk:checked')).map(chk => chk.value);
         let totalUnik = new Set(globalRows.map(row => String(row[popupActiveColIndex] || "").trim())).size;
 
         if (selectedValues.length === totalUnik) {
-            // Jika semua dipilih, hapus filter dari object
             delete activeColFilters[popupActiveColIndex];
         } else {
             activeColFilters[popupActiveColIndex] = selectedValues;
         }
 
         tutupPopup();
-        
-        // Re-render hanya untuk update icon corong (biru/abu)
         renderTabel(globalHeaders, globalRows);
     }
 
-    // ==========================================
-    // LOGIKA FILTER GLOBAL & APLIKASI FILTER KOLOM
-    // ==========================================
     function terapkanFilterGlobal() {
         let filterMode = document.getElementById('filterMode').value;
         let globalCari = document.getElementById('searchInput').value.toLowerCase();
@@ -507,7 +339,6 @@
             let rowData = globalRows[index];
             let teksBaris = rowData.join(" ").toLowerCase();
             
-            // 1. Cek Lolos Mode Global / Tanggal
             let lolosGlobal = true;
             if (filterMode === 'global') {
                 if(globalCari) lolosGlobal = teksBaris.includes(globalCari);
@@ -521,7 +352,6 @@
                 }
             }
 
-            // 2. Cek Lolos Filter Kolom Popup
             let lolosKolom = true;
             for (const [colIdx, allowedValues] of Object.entries(activeColFilters)) {
                 let cellData = String(rowData[colIdx] || "").trim();
@@ -554,9 +384,6 @@
         document.getElementById('rowCount').innerText = `${count} Baris Data`;
     }
 
-    // ==========================================
-    // FITUR EKSPORT (PDF & EXCEL)
-    // ==========================================
     function getCetakHTML() {
         let checkedBoxes = document.querySelectorAll('.row-chk:checked');
         if (checkedBoxes.length === 0) { alert("Pilih minimal satu baris data untuk diekspor."); return null; }
@@ -573,7 +400,7 @@
             html += `<tr>`;
             checkedCols.forEach(idx => {
                 let td = tr.querySelector(`td[data-colindex="${idx}"]`);
-                let cellContent = td ? (td.querySelector('.cell-content') ? td.querySelector('.cell-content').innerHTML : td.innerHTML) : '';
+                let cellContent = td ? (td.querySelector('.line-clamp-4') ? td.querySelector('.line-clamp-4').innerHTML : td.innerHTML) : '';
                 if(cellContent.includes('<a href=')) {
                     let match = cellContent.match(/href="([^"]*)"/);
                     if(match) cellContent = match[1]; 
@@ -635,9 +462,6 @@
         document.body.removeChild(a);
     }
 
-    // ==========================================
-    // UTILITAS TABEL UMUM
-    // ==========================================
     function sortTable(colIndex, headerElement) {
         const tbody = document.getElementById('tabelBody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -645,7 +469,7 @@
         else { currentSortCol = colIndex; currentSortAsc = true; document.querySelectorAll('.sort-icon').forEach(i => { i.innerHTML = '⇅'; i.style.color = '#94a3b8'; }); }
         
         headerElement.querySelector('.sort-icon').innerHTML = currentSortAsc ? '▲' : '▼';
-        headerElement.querySelector('.sort-icon').style.color = 'var(--primary-blue)';
+        headerElement.querySelector('.sort-icon').style.color = '#297ec6';
 
         rows.sort((a, b) => {
             let valA = a.cells[colIndex + 1].innerText.trim();
@@ -658,8 +482,22 @@
         rows.forEach(r => tbody.appendChild(r));
     }
 
-    function highlightRow(checkbox) { let tr = checkbox.closest('tr'); checkbox.checked ? tr.classList.add('selected') : tr.classList.remove('selected'); }
-    function toggleCheckAll(mChk) { document.querySelectorAll('#tabelBody tr:not([style*="display: none"])').forEach(tr => { let c = tr.querySelector('.row-chk'); c.checked = mChk.checked; highlightRow(c); }); }
+    function highlightRow(checkbox) { 
+        let tr = checkbox.closest('tr'); 
+        if(checkbox.checked) {
+            tr.classList.add('bg-blue-50/80');
+        } else {
+            tr.classList.remove('bg-blue-50/80');
+        }
+    }
+
+    function toggleCheckAll(mChk) { 
+        document.querySelectorAll('#tabelBody tr:not([style*="display: none"])').forEach(tr => { 
+            let c = tr.querySelector('.row-chk'); 
+            c.checked = mChk.checked; 
+            highlightRow(c); 
+        }); 
+    }
     
     function initResizableColumns() {
         const table = document.querySelector('table');

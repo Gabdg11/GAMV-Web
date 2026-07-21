@@ -59,13 +59,16 @@
         .toolbar select:focus, .toolbar input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(41, 126, 198, 0.15); }
         .search-box { flex-grow: 1; max-width: 280px; }
         
-        .btn-print {
-            background: var(--primary-yellow); color: var(--text-main); border: none; padding: 8px 16px;
+        .btn-action {
+            color: var(--text-main); border: none; padding: 8px 16px;
             border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700;
-            margin-left: auto; display: flex; align-items: center; gap: 6px; transition: 0.2s;
-            box-shadow: 0 2px 4px rgba(255, 222, 23, 0.3);
+            display: flex; align-items: center; gap: 6px; transition: 0.2s;
         }
-        .btn-print:hover { background: #e5c714; box-shadow: 0 2px 6px rgba(255, 222, 23, 0.5); transform: translateY(-1px); }
+        .btn-pdf { background: #ef4444; color: white; margin-left: auto; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3); }
+        .btn-pdf:hover { background: #dc2626; transform: translateY(-1px); }
+        
+        .btn-excel { background: #10b981; color: white; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3); }
+        .btn-excel:hover { background: #059669; transform: translateY(-1px); }
 
         .table-container {
             flex-grow: 1; overflow: auto; background: #ffffff; position: relative;
@@ -87,7 +90,6 @@
             -webkit-box-orient: vertical;
         }
 
-        /* Sticky Header agar selalu menempel di atas layar saat digeser */
         th {
             background-color: #f8fafc; color: #334155; position: sticky; top: 0;
             z-index: 20; font-weight: 600; border-top: 1px solid #e2e8f0; border-bottom: 2px solid #cbd5e1;
@@ -100,13 +102,6 @@
         }
         .resizer:hover, .resizing { border-right: 2px solid var(--primary-blue); background: rgba(41, 126, 198, 0.1); }
 
-        .col-filter-input {
-            width: 100%; box-sizing: border-box; padding: 6px; margin-top: 8px;
-            border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;
-            font-weight: normal; outline: none; background: #ffffff; transition: 0.2s;
-        }
-        .col-filter-input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 2px rgba(41, 126, 198, 0.15); }
-        
         tr:hover td { background-color: #f4f9fd; }
         tr.selected td { background-color: #eaf3fa; }
         td:first-child, th:first-child { border-left: 1px solid #e2e8f0; }
@@ -118,22 +113,19 @@
         .btn-link:hover { background: var(--primary-yellow); color: var(--text-main); }
 
         .status-msg { padding: 40px 20px; text-align: center; color: #64748b; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; height: 100%; }
-        
         .spinner { width: 30px; height: 30px; border: 3px solid #f1f5f9; border-top: 3px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .chk-box { cursor: pointer; width: 16px; height: 16px; accent-color: var(--primary-blue); }
-        .col-print-chk { cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary-blue); flex-shrink: 0; }
+        .col-print-chk { cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary-blue); flex-shrink: 0; margin-top: 3px; }
         .header-sort:hover { color: var(--primary-blue); }
         
-        /* Tombol Sembunyikan/Hide Kolom */
         .btn-hide-col {
             background: #ef4444; color: white; border: none; padding: 2px 6px; border-radius: 4px;
-            font-size: 10px; cursor: pointer; font-weight: 600; transition: 0.2s;
+            font-size: 10px; cursor: pointer; font-weight: 600; transition: 0.2s; margin-top: 2px;
         }
         .btn-hide-col:hover { background: #dc2626; }
 
-        /* Panel untuk memunculkan kembali kolom yang di-hide */
         .hidden-cols-bar {
             padding: 8px 20px; background: #e2e8f0; font-size: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; display: none;
         }
@@ -141,6 +133,54 @@
             background: #ffffff; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--primary-blue);
         }
         .unhide-pill:hover { background: var(--primary-blue); color: white; }
+
+        /* =========================================
+           POPUP FILTER SPREADSHEET STYLE
+           ========================================= */
+        .filter-icon {
+            cursor: pointer; color: #94a3b8; font-size: 12px; padding: 2px; border-radius: 4px; transition: 0.2s;
+        }
+        .filter-icon:hover, .filter-icon.active { background: #e2e8f0; color: var(--primary-blue); }
+        
+        .filter-popup {
+            position: absolute; background: white; border: 1px solid #cbd5e1; border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 220px; z-index: 1000;
+            display: none; flex-direction: column; font-size: 12px;
+        }
+        .filter-popup-search {
+            padding: 8px; border-bottom: 1px solid #e2e8f0;
+        }
+        .filter-popup-search input {
+            width: 100%; box-sizing: border-box; padding: 6px; border: 1px solid #cbd5e1;
+            border-radius: 4px; outline: none; font-size: 12px;
+        }
+        .filter-popup-search input:focus { border-color: var(--primary-blue); }
+        .filter-popup-actions {
+            padding: 6px 8px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+            display: flex; justify-content: space-between; font-weight: 500;
+        }
+        .filter-popup-actions a { color: var(--primary-blue); text-decoration: none; cursor: pointer; }
+        .filter-popup-actions a:hover { text-decoration: underline; }
+        
+        .filter-popup-list {
+            max-height: 200px; overflow-y: auto; padding: 6px 0;
+        }
+        .filter-item {
+            padding: 4px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .filter-item:hover { background: #f1f5f9; }
+        .filter-item input { cursor: pointer; accent-color: var(--primary-blue); }
+        .filter-item label { cursor: pointer; user-select: none; flex-grow: 1; word-break: break-all; }
+        
+        .filter-popup-footer {
+            padding: 8px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc;
+        }
+        .filter-popup-footer button {
+            padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font-weight: 600; transition: 0.2s;
+        }
+        .filter-popup-footer button:hover { background: #f1f5f9; }
+        .filter-popup-footer .btn-oke { background: #15803d; color: white; border: none; }
+        .filter-popup-footer .btn-oke:hover { background: #166534; }
     </style>
 </head>
 <body>
@@ -158,35 +198,35 @@
 
     <!-- 2. TOOLBAR FILTERING & PRINT -->
     <div class="toolbar" id="toolbar" style="display: none;">
-        <!-- Pilihan Opsi Jenis Filter -->
         <div class="filter-group">
-            <label>Mode Filter:</label>
+            <label>Mode Cari:</label>
             <select id="filterMode" onchange="gantiModeFilter()">
                 <option value="global">Cari Teks Bebas</option>
                 <option value="dateRange">Rentang Tanggal</option>
             </select>
         </div>
 
-        <!-- Input Berdasarkan Mode -->
         <div class="filter-group" id="groupSearch">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Ketik kata kunci..." oninput="terapkanFilter()">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Ketik kata kunci..." oninput="terapkanFilterGlobal()">
         </div>
 
         <div class="filter-group" id="groupDateStart" style="display: none;">
             <label>Mulai:</label>
-            <input type="date" id="dateStart" onchange="terapkanFilter()">
+            <input type="date" id="dateStart" onchange="terapkanFilterGlobal()">
         </div>
         <div class="filter-group" id="groupDateEnd" style="display: none;">
             <label>Akhir:</label>
-            <input type="date" id="dateEnd" onchange="terapkanFilter()">
+            <input type="date" id="dateEnd" onchange="terapkanFilterGlobal()">
         </div>
         
-        <span id="rowCount" style="font-size: 13px; font-weight:600; color: #475569; margin-left: 15px; background: #eaf3fa; color: var(--primary-blue); padding: 6px 12px; border-radius: 20px;"></span>
+        <span id="rowCount" style="font-size: 13px; font-weight:600; color: #475569; margin-left: 10px; background: #eaf3fa; color: var(--primary-blue); padding: 6px 12px; border-radius: 20px;"></span>
         
-        <button class="btn-print" onclick="cetakData()">🖨️ Cetak Terpilih</button>
+        <!-- Tombol Ekspor Dual -->
+        <button class="btn-action btn-pdf" onclick="eksporPDF()">📄 PDF</button>
+        <button class="btn-action btn-excel" onclick="eksporExcel()">📊 Excel</button>
     </div>
 
-    <!-- Panel Kotak untuk Memunculkan Kolom yang di-Hide -->
+    <!-- Panel Kolom Tersembunyi -->
     <div class="hidden-cols-bar" id="hiddenColsBar">
         <span style="font-weight: 600; color: #475569;">Kolom disembunyikan:</span>
         <div id="hiddenColsList" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
@@ -200,6 +240,22 @@
         </div>
     </div>
 
+    <!-- Elemen Popup Filter (Tersembunyi) -->
+    <div id="filterPopup" class="filter-popup">
+        <div class="filter-popup-search">
+            <input type="text" id="popupSearchInput" placeholder="Cari filter..." oninput="cariItemPopup()">
+        </div>
+        <div class="filter-popup-actions">
+            <a onclick="cekSemuaPopup(true)">Pilih Semua</a>
+            <a onclick="cekSemuaPopup(false)">Bersihkan</a>
+        </div>
+        <div class="filter-popup-list" id="popupListContainer"></div>
+        <div class="filter-popup-footer">
+            <button onclick="tutupPopup()">Batal</button>
+            <button class="btn-oke" onclick="terapkanPopup()">Oke</button>
+        </div>
+    </div>
+
 <script>
     const URL_API = "https://script.google.com/macros/s/AKfycbwPxO5P8ZRFgIndBn8XksJqzi8F6wZA8Hch-yS6-aIk8trNgmkIjhNCMWPfbA_GBcNV/exec";
 
@@ -209,7 +265,19 @@
     
     let currentSortCol = -1;
     let currentSortAsc = true;
-    let hiddenColumns = new Set(); // Menyimpan index kolom yang di-hide
+    let hiddenColumns = new Set();
+    
+    // Objek penyimpan status filter kolom aktif { colIndex: ["nilai1", "nilai2"] }
+    let activeColFilters = {};
+    let popupActiveColIndex = -1;
+
+    // Klik di luar popup akan menutup popup
+    document.addEventListener('click', function(event) {
+        let popup = document.getElementById('filterPopup');
+        if (popup.style.display === 'flex' && !popup.contains(event.target) && !event.target.classList.contains('filter-icon')) {
+            tutupPopup();
+        }
+    });
 
     async function tarikData(sourceName, elemenDiklik) {
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -226,8 +294,11 @@
         document.getElementById('searchInput').value = '';
         document.getElementById('dateStart').value = '';
         document.getElementById('dateEnd').value = '';
+        
         currentSortCol = -1;
         hiddenColumns.clear();
+        activeColFilters = {};
+        tutupPopup();
 
         try {
             let res = await fetch(`${URL_API}?source=${encodeURIComponent(sourceName)}`);
@@ -248,7 +319,7 @@
 
             toolbar.style.display = "flex";
             renderTabel(globalHeaders, globalRows);
-            document.getElementById('rowCount').innerText = `${globalRows.length} Baris Data`;
+            updateRowCount();
 
         } catch (error) {
             tableContainer.innerHTML = `<div class="status-msg" style="color:#ef4444;">Gagal terhubung ke server database.</div>`;
@@ -262,83 +333,63 @@
         let dEnd = document.getElementById('groupDateEnd');
 
         if (mode === 'global') {
-            sBox.style.display = "flex";
-            dStart.style.display = "none";
-            dEnd.style.display = "none";
-            document.getElementById('dateStart').value = '';
-            document.getElementById('dateEnd').value = '';
+            sBox.style.display = "flex"; dStart.style.display = "none"; dEnd.style.display = "none";
+            document.getElementById('dateStart').value = ''; document.getElementById('dateEnd').value = '';
         } else {
-            sBox.style.display = "none";
-            dStart.style.display = "flex";
-            dEnd.style.display = "flex";
+            sBox.style.display = "none"; dStart.style.display = "flex"; dEnd.style.display = "flex";
             document.getElementById('searchInput').value = '';
         }
-        terapkanFilter();
+        terapkanFilterGlobal();
     }
 
-    function hideColumn(index) {
-        hiddenColumns.add(index);
-        renderTabel(globalHeaders, globalRows);
-    }
-
-    function showColumn(index) {
-        hiddenColumns.delete(index);
-        renderTabel(globalHeaders, globalRows);
-    }
+    function hideColumn(index) { hiddenColumns.add(index); renderTabel(globalHeaders, globalRows); }
+    function showColumn(index) { hiddenColumns.delete(index); renderTabel(globalHeaders, globalRows); }
 
     function renderTabel(headers, barisData) {
         const tableContainer = document.getElementById("tableContainer");
         const hiddenBar = document.getElementById('hiddenColsBar');
         const hiddenList = document.getElementById('hiddenColsList');
         
-        // Render bar informasi kolom yang disembunyikan
         if (hiddenColumns.size > 0) {
             hiddenBar.style.display = "flex";
-            let pillsHtml = "";
-            hiddenColumns.forEach(idx => {
-                pillsHtml += `<span class="unhide-pill" onclick="showColumn(${idx})">➕ ${headers[idx]}</span>`;
-            });
-            hiddenList.innerHTML = pillsHtml;
+            hiddenList.innerHTML = Array.from(hiddenColumns).map(idx => `<span class="unhide-pill" onclick="showColumn(${idx})">➕ ${headers[idx]}</span>`).join('');
         } else {
             hiddenBar.style.display = "none";
         }
 
         let html = `<table><thead><tr>`;
-        
-        // Header Checkbox Master Baris
         html += `<th style="width: 40px; text-align: center;">
-                    <div style="margin-bottom: 6px;">Cetak</div>
+                    <div style="margin-bottom: 6px;">Pilih</div>
                     <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)" title="Pilih Semua Baris">
                  </th>`;
         
-        // Header Kolom + Tombol Hide & Sort
         headers.forEach((header, index) => { 
             let isHidden = hiddenColumns.has(index);
             let displayStyle = isHidden ? "display: none;" : "";
+            let filterActiveCls = activeColFilters[index] ? "active" : "";
 
             html += `<th style="${displayStyle}" data-colindex="${index}">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-                            <div class="cell-content header-sort" style="-webkit-line-clamp: 2; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-grow: 1;" title="Klik untuk mengurutkan data" onclick="sortTable(${index}, this)">
-                                ${header} 
-                                <span class="sort-icon" style="color:#94a3b8; font-size:10px; flex-shrink: 0;">⇅</span>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                                <div class="cell-content header-sort" style="-webkit-line-clamp: 2; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-grow: 1;" title="Klik urutkan" onclick="sortTable(${index}, this)">
+                                    ${header} <span class="sort-icon" style="color:#94a3b8; font-size:10px; flex-shrink:0;">⇅</span>
+                                </div>
+                                <div style="display: flex; gap: 4px; align-items: center;">
+                                    <span class="filter-icon ${filterActiveCls}" onclick="bukaPopup(event, ${index})" title="Filter Kolom">▼</span>
+                                </div>
                             </div>
-                            <div style="display: flex; gap: 4px; align-items: center;">
-                                <button class="btn-hide-col" onclick="hideColumn(${index})" title="Sembunyikan Kolom Ini">Hide</button>
-                                <input type="checkbox" class="col-print-chk" data-colindex="${index}" checked title="Centang agar kolom ini ikut di-print">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <button class="btn-hide-col" onclick="hideColumn(${index})">Hide</button>
+                                <input type="checkbox" class="col-print-chk" data-colindex="${index}" checked title="Centang untuk Ekspor">
                             </div>
                         </div>
-                        <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter..." oninput="terapkanFilter()">
                      </th>`; 
         });
         html += `</tr></thead><tbody id="tabelBody">`;
 
-        // Render Baris Data
         barisData.forEach((row, originalIndex) => {
             html += `<tr id="row_${originalIndex}">`;
-            
-            html += `<td style="text-align: center;">
-                        <input type="checkbox" class="chk-box row-chk" onchange="highlightRow(this)">
-                     </td>`;
+            html += `<td style="text-align: center;"><input type="checkbox" class="chk-box row-chk" onchange="highlightRow(this)"></td>`;
                      
             row.forEach((cell, colIndex) => {
                 let isHidden = hiddenColumns.has(colIndex);
@@ -346,8 +397,7 @@
                 let rawCell = cell !== undefined && cell !== null ? cell : '';
                 
                 if (typeof rawCell === 'string' && (rawCell.startsWith('http://') || rawCell.startsWith('https://'))) {
-                    let formattedCell = `<a href="${rawCell}" target="_blank" class="btn-link">Buka Berkas ↗</a>`;
-                    html += `<td style="${displayStyle}" data-colindex="${colIndex}"><div class="cell-content" title="${rawCell}">${formattedCell}</div></td>`;
+                    html += `<td style="${displayStyle}" data-colindex="${colIndex}"><div class="cell-content" title="${rawCell}"><a href="${rawCell}" target="_blank" class="btn-link">Berkas ↗</a></div></td>`;
                 } else {
                     html += `<td style="${displayStyle}" data-colindex="${colIndex}"><div class="cell-content" title="${String(rawCell).replace(/<[^>]*>?/gm, '')}">${rawCell}</div></td>`;
                 }
@@ -359,117 +409,87 @@
         tableContainer.innerHTML = html;
 
         initResizableColumns();
-        terapkanFilter(); // Pertahankan filter aktif saat render ulang
+        terapkanFilterGlobal(); 
     }
 
-    function sortTable(colIndex, headerElement) {
-        const tbody = document.getElementById('tabelBody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
+    // ==========================================
+    // LOGIKA FILTER POPUP ALA SPREADSHEET
+    // ==========================================
+    function bukaPopup(event, colIndex) {
+        event.stopPropagation();
+        popupActiveColIndex = colIndex;
+        
+        let iconRect = event.target.getBoundingClientRect();
+        let popup = document.getElementById('filterPopup');
+        let listContainer = document.getElementById('popupListContainer');
+        document.getElementById('popupSearchInput').value = '';
 
-        if (currentSortCol === colIndex) {
-            currentSortAsc = !currentSortAsc;
+        // Ambil nilai unik dari data master untuk kolom ini
+        let uniqueValues = [...new Set(globalRows.map(row => String(row[colIndex] || "").trim()))].sort();
+        
+        // Cek filter yang sudah ada
+        let existingFilter = activeColFilters[colIndex] || null;
+
+        let listHtml = "";
+        uniqueValues.forEach((val, i) => {
+            let isChecked = existingFilter ? existingFilter.includes(val) : true;
+            let displayVal = val === "" ? "(Kosong)" : val;
+            listHtml += `<label class="filter-item">
+                            <input type="checkbox" class="popup-item-chk" value="${val}" ${isChecked ? 'checked' : ''}>
+                            <span>${displayVal}</span>
+                         </label>`;
+        });
+        listContainer.innerHTML = listHtml;
+
+        // Posisi popup
+        popup.style.top = (iconRect.bottom + window.scrollY + 5) + "px";
+        let leftPos = iconRect.left + window.scrollX;
+        if (leftPos + 220 > window.innerWidth) leftPos = window.innerWidth - 240;
+        popup.style.left = leftPos + "px";
+        popup.style.display = "flex";
+    }
+
+    function tutupPopup() {
+        document.getElementById('filterPopup').style.display = "none";
+    }
+
+    function cariItemPopup() {
+        let kw = document.getElementById('popupSearchInput').value.toLowerCase();
+        let items = document.querySelectorAll('.filter-item');
+        items.forEach(item => {
+            let text = item.querySelector('span').innerText.toLowerCase();
+            item.style.display = text.includes(kw) ? "flex" : "none";
+        });
+    }
+
+    function cekSemuaPopup(checkState) {
+        let items = document.querySelectorAll('.filter-item:not([style*="display: none"]) .popup-item-chk');
+        items.forEach(chk => chk.checked = checkState);
+    }
+
+    function terapkanPopup() {
+        let checkedBoxes = document.querySelectorAll('.popup-item-chk:checked');
+        let selectedValues = Array.from(checkedBoxes).map(chk => chk.value);
+        
+        let totalUnik = new Set(globalRows.map(row => String(row[popupActiveColIndex] || "").trim())).size;
+
+        if (selectedValues.length === totalUnik) {
+            // Jika semua dipilih, hapus filter dari object
+            delete activeColFilters[popupActiveColIndex];
         } else {
-            currentSortCol = colIndex;
-            currentSortAsc = true;
-            document.querySelectorAll('.sort-icon').forEach(icon => {
-                icon.innerHTML = '⇅';
-                icon.style.color = '#94a3b8';
-            });
+            activeColFilters[popupActiveColIndex] = selectedValues;
         }
 
-        const currentIcon = headerElement.querySelector('.sort-icon');
-        currentIcon.innerHTML = currentSortAsc ? '▲' : '▼';
-        currentIcon.style.color = 'var(--primary-blue)';
-
-        rows.sort((a, b) => {
-            let valA = a.cells[colIndex + 1].innerText.trim();
-            let valB = b.cells[colIndex + 1].innerText.trim();
-
-            let dA = new Date(valA);
-            let dB = new Date(valB);
-            let isDate = (dA.toString() !== 'Invalid Date' && dB.toString() !== 'Invalid Date' && valA.length > 6 && valB.length > 6 && isNaN(valA));
-
-            let comparison = 0;
-            if (isDate) {
-                comparison = dA.getTime() - dB.getTime();
-            } else {
-                comparison = valA.localeCompare(valB, 'id', { numeric: true, sensitivity: 'base' });
-            }
-
-            return currentSortAsc ? comparison : -comparison;
-        });
-
-        rows.forEach(row => tbody.appendChild(row));
-    }
-
-    function initResizableColumns() {
-        const table = document.querySelector('table');
-        const cols = document.querySelectorAll('th');
+        tutupPopup();
         
-        cols.forEach(col => {
-            if(!col.style.width) col.style.width = `${col.offsetWidth}px`;
-        });
-        
-        table.style.tableLayout = 'fixed';
-        table.style.width = 'max-content'; 
-        table.style.minWidth = '100%';
-
-        cols.forEach(col => {
-            if(col.querySelector('.resizer')) return; // Hindai duplikat resizer
-            const resizer = document.createElement('div');
-            resizer.classList.add('resizer');
-            col.appendChild(resizer);
-            
-            let x = 0;
-            let w = 0;
-
-            const mouseDownHandler = function (e) {
-                document.body.style.userSelect = 'none';
-                x = e.clientX;
-                w = col.offsetWidth;
-
-                document.addEventListener('mousemove', mouseMoveHandler);
-                document.addEventListener('mouseup', mouseUpHandler);
-                resizer.classList.add('resizing');
-            };
-
-            const mouseMoveHandler = function (e) {
-                const dx = e.clientX - x;
-                let newWidth = w + dx;
-                if (newWidth < 100) newWidth = 100; 
-                col.style.width = `${newWidth}px`;
-            };
-
-            const mouseUpHandler = function () {
-                document.body.style.userSelect = ''; 
-                document.removeEventListener('mousemove', mouseMoveHandler);
-                document.removeEventListener('mouseup', mouseUpHandler);
-                resizer.classList.remove('resizing');
-            };
-
-            resizer.addEventListener('mousedown', mouseDownHandler);
-        });
+        // Re-render hanya untuk update icon corong (biru/abu)
+        renderTabel(globalHeaders, globalRows);
     }
 
-    function highlightRow(checkbox) {
-        let tr = checkbox.closest('tr');
-        if (checkbox.checked) {
-            tr.classList.add('selected');
-        } else {
-            tr.classList.remove('selected');
-        }
-    }
-
-    function toggleCheckAll(masterCheckbox) {
-        let visibleRows = document.querySelectorAll('#tabelBody tr:not([style*="display: none"])');
-        visibleRows.forEach(tr => {
-            let chk = tr.querySelector('.row-chk');
-            chk.checked = masterCheckbox.checked;
-            highlightRow(chk);
-        });
-    }
-
-    function terapkanFilter() {
+    // ==========================================
+    // LOGIKA FILTER GLOBAL & APLIKASI FILTER KOLOM
+    // ==========================================
+    function terapkanFilterGlobal() {
         let filterMode = document.getElementById('filterMode').value;
         let globalCari = document.getElementById('searchInput').value.toLowerCase();
         let dateStart = document.getElementById('dateStart').value;
@@ -480,10 +500,6 @@
         if (dStart) dStart.setHours(0, 0, 0, 0);
         if (dEnd) dEnd.setHours(23, 59, 59, 999);
 
-        let colFilters = Array.from(document.querySelectorAll('.col-filter-input')).map(input => {
-            return { index: parseInt(input.getAttribute('data-colindex')), keyword: input.value.toLowerCase() };
-        }).filter(f => f.keyword !== "");
-
         let trs = document.querySelectorAll('#tabelBody tr');
         let countVisible = 0;
 
@@ -491,9 +507,10 @@
             let rowData = globalRows[index];
             let teksBaris = rowData.join(" ").toLowerCase();
             
+            // 1. Cek Lolos Mode Global / Tanggal
             let lolosGlobal = true;
             if (filterMode === 'global') {
-                lolosGlobal = teksBaris.includes(globalCari);
+                if(globalCari) lolosGlobal = teksBaris.includes(globalCari);
             } else {
                 if (dStart || dEnd) {
                     let cellTanggal = new Date(rowData[0]); 
@@ -504,106 +521,161 @@
                 }
             }
 
-            let lolosCol = true;
-            for (let f of colFilters) {
-                let cellData = rowData[f.index] !== undefined && rowData[f.index] !== null ? String(rowData[f.index]).toLowerCase() : "";
-                if (!cellData.includes(f.keyword)) {
-                    lolosCol = false;
+            // 2. Cek Lolos Filter Kolom Popup
+            let lolosKolom = true;
+            for (const [colIdx, allowedValues] of Object.entries(activeColFilters)) {
+                let cellData = String(rowData[colIdx] || "").trim();
+                if (!allowedValues.includes(cellData)) {
+                    lolosKolom = false;
                     break;
                 }
             }
 
-            if (lolosGlobal && lolosCol) {
+            if (lolosGlobal && lolosKolom) {
                 tr.style.display = "";
                 countVisible++;
             } else {
                 tr.style.display = "none";
                 let chk = tr.querySelector('.row-chk');
-                if(chk.checked) {
+                if(chk && chk.checked) {
                     chk.checked = false;
                     highlightRow(chk);
                 }
             }
         });
         
-        document.getElementById('rowCount').innerText = `${countVisible} Baris Data`;
+        updateRowCount(countVisible);
         let chkAll = document.getElementById('chkAll');
         if(chkAll) chkAll.checked = false;
     }
 
-    function cetakData() {
+    function updateRowCount(count) {
+        if(count === undefined) count = document.querySelectorAll('#tabelBody tr:not([style*="display: none"])').length;
+        document.getElementById('rowCount').innerText = `${count} Baris Data`;
+    }
+
+    // ==========================================
+    // FITUR EKSPORT (PDF & EXCEL)
+    // ==========================================
+    function getCetakHTML() {
         let checkedBoxes = document.querySelectorAll('.row-chk:checked');
-        if (checkedBoxes.length === 0) {
-            return alert("Pilih minimal satu baris data untuk dicetak.");
-        }
+        if (checkedBoxes.length === 0) { alert("Pilih minimal satu baris data untuk diekspor."); return null; }
 
         let checkedCols = Array.from(document.querySelectorAll('.col-print-chk:checked')).map(chk => parseInt(chk.getAttribute('data-colindex'))).filter(idx => !hiddenColumns.has(idx));
-        
-        if (checkedCols.length === 0) {
-            return alert("Pilih minimal satu kolom yang aktif untuk dicetak.");
-        }
+        if (checkedCols.length === 0) { alert("Pilih minimal satu kolom aktif untuk diekspor."); return null; }
 
-        let printWindow = window.open('', '_blank');
-        
-        let printHtml = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Print Document - ${currentModule}</title>
-                <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #1e293b; padding: 20px; }
-                    h2 { text-align: center; color: #0f172a; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-                    .print-date { text-align: center; margin-bottom: 25px; color: #64748b; font-size: 12px; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; vertical-align: top; word-wrap: break-word; }
-                    th { background-color: #f8fafc; font-weight: 700; color: #334155; }
-                    @media print { @page { size: landscape; margin: 15mm; } }
-                </style>
-            </head>
-            <body>
-                <h2>Dokumen Laporan Operasional</h2>
-                <div class="print-date">Modul: <strong>${currentModule}</strong> &nbsp;|&nbsp; Dicetak: ${new Date().toLocaleString('id-ID')}</div>
-                <table>
-                    <thead><tr>
-        `;
-
-        checkedCols.forEach(colIndex => {
-            printHtml += `<th>${globalHeaders[colIndex]}</th>`;
-        });
-        printHtml += `</tr></thead><tbody>`;
+        let html = `<table><thead><tr>`;
+        checkedCols.forEach(idx => html += `<th>${globalHeaders[idx]}</th>`);
+        html += `</tr></thead><tbody>`;
 
         checkedBoxes.forEach(chk => {
             let tr = chk.closest('tr');
-            printHtml += `<tr>`;
-            
-            checkedCols.forEach(colIndex => {
-                let td = tr.querySelector(`td[data-colindex="${colIndex}"]`);
-                let cellDiv = td ? td.querySelector('.cell-content') : null;
-                let cellContent = cellDiv ? cellDiv.innerHTML : (td ? td.innerHTML : '');
-
+            html += `<tr>`;
+            checkedCols.forEach(idx => {
+                let td = tr.querySelector(`td[data-colindex="${idx}"]`);
+                let cellContent = td ? (td.querySelector('.cell-content') ? td.querySelector('.cell-content').innerHTML : td.innerHTML) : '';
                 if(cellContent.includes('<a href=')) {
-                    let hrefMatch = cellContent.match(/href="([^"]*)"/);
-                    if(hrefMatch && hrefMatch[1]) {
-                        cellContent = `<span style="word-break: break-all; color: #297ec6; text-decoration: underline;">${hrefMatch[1]}</span>`;
-                    }
+                    let match = cellContent.match(/href="([^"]*)"/);
+                    if(match) cellContent = match[1]; 
                 }
-                printHtml += `<td>${cellContent}</td>`;
+                html += `<td>${cellContent}</td>`;
             });
-            printHtml += `</tr>`;
+            html += `</tr>`;
         });
+        html += `</tbody></table>`;
+        return html;
+    }
 
-        printHtml += `
-                    </tbody>
-                </table>
-                <script> window.onload = function() { window.print(); }; <\/script>
-            </body>
-            </html>
+    function eksporPDF() {
+        let tableHtml = getCetakHTML();
+        if(!tableHtml) return;
+
+        let printWindow = window.open('', '_blank');
+        let printTemplate = `
+            <!DOCTYPE html><html><head><title>Print PDF - ${currentModule}</title>
+            <style>
+                body { font-family: 'Segoe UI', sans-serif; font-size: 11px; padding: 20px; color: #000; }
+                h2 { text-align: center; margin-bottom: 5px; text-transform: uppercase; }
+                .meta { text-align: center; margin-bottom: 25px; color: #555; font-size: 12px; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: top; word-break: break-word; }
+                th { background-color: #f0f0f0; font-weight: bold; }
+                @media print { @page { size: landscape; margin: 15mm; } }
+            </style></head><body>
+            <h2>Laporan Operasional</h2>
+            <div class="meta">Modul: <strong>${currentModule}</strong> | Dicetak: ${new Date().toLocaleString('id-ID')}</div>
+            ${tableHtml}
+            <script> window.onload = function() { window.print(); }; <\/script>
+            </body></html>
         `;
-
-        printWindow.document.write(printHtml);
+        printWindow.document.write(printTemplate);
         printWindow.document.close();
     }
-</script>
 
+    function eksporExcel() {
+        let tableHtml = getCetakHTML();
+        if(!tableHtml) return;
+
+        let excelTemplate = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="UTF-8"><style>table {border-collapse: collapse;} th, td {border: 1px solid black; padding: 5px;}</style></head>
+            <body>
+                <h3>Modul: ${currentModule}</h3>
+                ${tableHtml}
+            </body></html>
+        `;
+
+        let blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = `Data_${currentModule.replace(/\s+/g, '_')}_${new Date().getTime()}.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // ==========================================
+    // UTILITAS TABEL UMUM
+    // ==========================================
+    function sortTable(colIndex, headerElement) {
+        const tbody = document.getElementById('tabelBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        if (currentSortCol === colIndex) currentSortAsc = !currentSortAsc;
+        else { currentSortCol = colIndex; currentSortAsc = true; document.querySelectorAll('.sort-icon').forEach(i => { i.innerHTML = '⇅'; i.style.color = '#94a3b8'; }); }
+        
+        headerElement.querySelector('.sort-icon').innerHTML = currentSortAsc ? '▲' : '▼';
+        headerElement.querySelector('.sort-icon').style.color = 'var(--primary-blue)';
+
+        rows.sort((a, b) => {
+            let valA = a.cells[colIndex + 1].innerText.trim();
+            let valB = b.cells[colIndex + 1].innerText.trim();
+            let dA = new Date(valA), dB = new Date(valB);
+            let isDate = (dA.toString() !== 'Invalid Date' && dB.toString() !== 'Invalid Date' && valA.length > 6 && valB.length > 6 && isNaN(valA));
+            let comp = isDate ? dA.getTime() - dB.getTime() : valA.localeCompare(valB, 'id', { numeric: true });
+            return currentSortAsc ? comp : -comp;
+        });
+        rows.forEach(r => tbody.appendChild(r));
+    }
+
+    function highlightRow(checkbox) { let tr = checkbox.closest('tr'); checkbox.checked ? tr.classList.add('selected') : tr.classList.remove('selected'); }
+    function toggleCheckAll(mChk) { document.querySelectorAll('#tabelBody tr:not([style*="display: none"])').forEach(tr => { let c = tr.querySelector('.row-chk'); c.checked = mChk.checked; highlightRow(c); }); }
+    
+    function initResizableColumns() {
+        const table = document.querySelector('table');
+        const cols = document.querySelectorAll('th');
+        cols.forEach(col => { if(!col.style.width) col.style.width = `${col.offsetWidth}px`; });
+        table.style.tableLayout = 'fixed'; table.style.width = 'max-content'; table.style.minWidth = '100%';
+        cols.forEach(col => {
+            if(col.querySelector('.resizer')) return; 
+            const resizer = document.createElement('div'); resizer.classList.add('resizer'); col.appendChild(resizer);
+            let x = 0, w = 0;
+            const md = e => { document.body.style.userSelect = 'none'; x = e.clientX; w = col.offsetWidth; document.addEventListener('mousemove', mm); document.addEventListener('mouseup', mu); resizer.classList.add('resizing'); };
+            const mm = e => { col.style.width = `${Math.max(100, w + (e.clientX - x))}px`; };
+            const mu = () => { document.body.style.userSelect = ''; document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); resizer.classList.remove('resizing'); };
+            resizer.addEventListener('mousedown', md);
+        });
+    }
+</script>
 </body>
 </html>

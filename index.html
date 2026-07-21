@@ -109,6 +109,19 @@
         </div>
     </div>
 
+    <!-- Modal Daftar Berkas / File Multi-link -->
+    <div id="modalBerkas" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-200 opacity-0">
+        <div class="bg-white rounded-xl shadow-2xl w-[22rem] max-w-[90%] overflow-hidden transform scale-95 transition-transform duration-200" id="modalBerkasContent">
+            <div class="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-700 text-sm">Daftar Berkas Terlampir</h3>
+                <button onclick="tutupModalBerkas()" class="text-slate-400 hover:text-rose-500 font-bold text-xl leading-none">&times;</button>
+            </div>
+            <div class="p-5 max-h-[60vh] overflow-y-auto" id="listBerkasContainer">
+                <!-- Daftar tautan berkas akan muncul di sini -->
+            </div>
+        </div>
+    </div>
+
 <script>
     const URL_API = "https://script.google.com/macros/s/AKfycbwPxO5P8ZRFgIndBn8XksJqzi8F6wZA8Hch-yS6-aIk8trNgmkIjhNCMWPfbA_GBcNV/exec";
 
@@ -236,6 +249,9 @@
         });
         html += `</tr></thead><tbody id="tabelBody" class="divide-y divide-slate-200">`;
 
+        // Deteksi Tautan File menggunakan Regex
+        const urlRegex = /(https?:\/\/[^\s,]+)/g;
+
         barisData.forEach((row, originalIndex) => {
             html += `<tr id="row_${originalIndex}" class="hover:bg-sky-50/60 transition">`;
             html += `<td class="border-r border-slate-200 px-3 py-2.5 text-center"><input type="checkbox" class="row-chk w-4 h-4 accent-primary-blue cursor-pointer" onchange="highlightRow(this)"></td>`;
@@ -243,13 +259,28 @@
             row.forEach((cell, colIndex) => {
                 let isHidden = hiddenColumns.has(colIndex);
                 let displayStyle = isHidden ? "display: none;" : "";
-                let rawCell = cell !== undefined && cell !== null ? cell : '';
-                
-                if (typeof rawCell === 'string' && (rawCell.startsWith('http://') || rawCell.startsWith('https://'))) {
-                    html += `<td class="border-r border-slate-200 px-3 py-2.5 text-xs text-slate-700" style="${displayStyle}" data-colindex="${colIndex}"><div class="line-clamp-4 break-words"><a href="${rawCell}" target="_blank" class="inline-block bg-primary-blue hover:bg-primary-yellow hover:text-slate-900 text-white px-2.5 py-1 rounded font-semibold transition shadow-sm">Berkas ↗</a></div></td>`;
+                let rawCell = cell !== undefined && cell !== null ? String(cell) : '';
+                let tdContent = "";
+
+                // Mencari URL / Link Google Drive di dalam text sel
+                let urls = rawCell.match(urlRegex);
+
+                if (urls && urls.length > 0) {
+                    if (urls.length === 1 && urls[0] === rawCell.trim()) {
+                        // Jika isinya murni HANYA 1 link saja
+                        tdContent = `<a href="${urls[0]}" target="_blank" class="inline-block bg-primary-blue hover:bg-primary-yellow hover:text-slate-900 text-white px-2.5 py-1 rounded font-semibold transition shadow-sm">Lihat Berkas ↗</a>`;
+                    } else {
+                        // Jika ada banyak link atau bercampur tulisan
+                        let encodedUrls = encodeURIComponent(JSON.stringify(urls));
+                        tdContent = `<button onclick="bukaModalBerkas('${encodedUrls}')" class="inline-block bg-primary-blue hover:bg-primary-yellow hover:text-slate-900 text-white px-2.5 py-1 rounded font-semibold transition shadow-sm">Lihat ${urls.length} Berkas ↗</button>`;
+                    }
                 } else {
-                    html += `<td class="border-r border-slate-200 px-3 py-2.5 text-xs text-slate-700" style="${displayStyle}" data-colindex="${colIndex}"><div class="line-clamp-4 break-words" title="${String(rawCell).replace(/<[^>]*>?/gm, '')}">${rawCell}</div></td>`;
+                    tdContent = rawCell.replace(/<[^>]*>?/gm, '');
                 }
+
+                html += `<td class="border-r border-slate-200 px-3 py-2.5 text-xs text-slate-700" style="${displayStyle}" data-colindex="${colIndex}">
+                            <div class="line-clamp-4 break-words" title="${rawCell.replace(/<[^>]*>?/gm, '').replace(/"/g, '&quot;')}">${tdContent}</div>
+                         </td>`;
             });
             html += `</tr>`;
         });
@@ -261,6 +292,55 @@
         terapkanFilterGlobal(); 
     }
 
+    // ==========================================
+    // LOGIKA MODAL MULTI-BERKAS / GOOGLE DRIVE
+    // ==========================================
+    function bukaModalBerkas(encodedUrls) {
+        let urls = JSON.parse(decodeURIComponent(encodedUrls));
+        let container = document.getElementById('listBerkasContainer');
+        let modal = document.getElementById('modalBerkas');
+        let content = document.getElementById('modalBerkasContent');
+        
+        let html = '<ul class="space-y-3">';
+        urls.forEach((url, i) => {
+            html += `<li>
+                <a href="${url}" target="_blank" class="flex items-center gap-3 p-3 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg text-primary-blue text-xs font-semibold transition group">
+                    <span class="bg-primary-blue text-white rounded-full w-6 h-6 flex items-center justify-center shrink-0">${i+1}</span>
+                    <span class="truncate group-hover:underline w-full">Buka Lampiran File ${i+1} ↗</span>
+                </a>
+            </li>`;
+        });
+        html += '</ul>';
+        container.innerHTML = html;
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('opacity-100');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 10);
+    }
+
+    function tutupModalBerkas() {
+        let modal = document.getElementById('modalBerkas');
+        let content = document.getElementById('modalBerkasContent');
+        
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }, 200);
+    }
+
+    // ==========================================
+    // LOGIKA FILTER POPUP & GLOBAL
+    // ==========================================
     function bukaPopup(event, colIndex) {
         event.stopPropagation();
         popupActiveColIndex = colIndex;
@@ -384,6 +464,9 @@
         document.getElementById('rowCount').innerText = `${count} Baris Data`;
     }
 
+    // ==========================================
+    // FITUR EKSPOR PDF & EXCEL
+    // ==========================================
     function getCetakHTML() {
         let checkedBoxes = document.querySelectorAll('.row-chk:checked');
         if (checkedBoxes.length === 0) { alert("Pilih minimal satu baris data untuk diekspor."); return null; }
@@ -400,11 +483,30 @@
             html += `<tr>`;
             checkedCols.forEach(idx => {
                 let td = tr.querySelector(`td[data-colindex="${idx}"]`);
-                let cellContent = td ? (td.querySelector('.line-clamp-4') ? td.querySelector('.line-clamp-4').innerHTML : td.innerHTML) : '';
-                if(cellContent.includes('<a href=')) {
-                    let match = cellContent.match(/href="([^"]*)"/);
-                    if(match) cellContent = match[1]; 
+                let cellContent = "";
+                
+                if (td) {
+                    // Cari tombol multi-link
+                    let btn = td.querySelector('button[onclick^="bukaModalBerkas"]');
+                    if (btn) {
+                        let match = btn.getAttribute('onclick').match(/bukaModalBerkas\('([^']+)'\)/);
+                        if (match) {
+                            let urls = JSON.parse(decodeURIComponent(match[1]));
+                            // Pisahkan multi-link dengan koma spasi untuk export
+                            cellContent = urls.join(" , "); 
+                        }
+                    } else {
+                        // Cari single link
+                        let a = td.querySelector('a');
+                        if (a) {
+                            cellContent = a.href;
+                        } else {
+                            // Ambil teks biasa
+                            cellContent = td.innerText;
+                        }
+                    }
                 }
+                
                 html += `<td>${cellContent}</td>`;
             });
             html += `</tr>`;

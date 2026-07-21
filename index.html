@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enterprise Dashboard System</title>
     <style>
-        /* =========================================
-           1. CSS RESET & ENTERPRISE TYPOGRAPHY
-           ========================================= */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
         :root {
@@ -29,9 +26,6 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* =========================================
-           2. TOP NAVIGATION BAR
-           ========================================= */
         .top-nav {
             background: #ffffff; border-bottom: 1px solid #e2e8f0;
             padding: 12px 20px; display: flex; gap: 10px;
@@ -52,20 +46,18 @@
         .nav-btn:hover { background: #fffdf0; border-color: var(--primary-yellow); color: var(--text-main); }
         .nav-btn.active { background: var(--primary-blue); color: #ffffff; border-color: var(--primary-blue); box-shadow: 0 2px 4px rgba(41, 126, 198, 0.2); }
 
-        /* =========================================
-           3. TOOLBAR FILTERING & PRINT
-           ========================================= */
         .toolbar {
             padding: 12px 20px; background: #ffffff; border-bottom: 1px solid #e2e8f0;
-            display: flex; gap: 15px; flex-wrap: wrap; align-items: center; flex-shrink: 0;
+            display: flex; gap: 12px; flex-wrap: wrap; align-items: center; flex-shrink: 0;
         }
         .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #475569; }
-        .toolbar input[type="text"], .toolbar input[type="date"] {
+        
+        .toolbar select, .toolbar input[type="text"], .toolbar input[type="date"] {
             padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
-            font-size: 13px; outline: none; transition: 0.2s; color: var(--text-main);
+            font-size: 13px; outline: none; transition: 0.2s; color: var(--text-main); background: #fff;
         }
-        .toolbar input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(41, 126, 198, 0.15); }
-        .search-box { flex-grow: 1; max-width: 350px; }
+        .toolbar select:focus, .toolbar input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(41, 126, 198, 0.15); }
+        .search-box { flex-grow: 1; max-width: 280px; }
         
         .btn-print {
             background: var(--primary-yellow); color: var(--text-main); border: none; padding: 8px 16px;
@@ -75,9 +67,6 @@
         }
         .btn-print:hover { background: #e5c714; box-shadow: 0 2px 6px rgba(255, 222, 23, 0.5); transform: translateY(-1px); }
 
-        /* =========================================
-           4. DATA TABLE AREA (EXCEL LIKE)
-           ========================================= */
         .table-container {
             flex-grow: 1; overflow: auto; background: #ffffff; position: relative;
         }
@@ -98,15 +87,16 @@
             -webkit-box-orient: vertical;
         }
 
+        /* Sticky Header agar selalu menempel di atas layar saat digeser */
         th {
             background-color: #f8fafc; color: #334155; position: sticky; top: 0;
-            z-index: 10; font-weight: 600; border-top: 1px solid #e2e8f0; border-bottom: 2px solid #cbd5e1;
-            position: relative; background-clip: padding-box;
+            z-index: 20; font-weight: 600; border-top: 1px solid #e2e8f0; border-bottom: 2px solid #cbd5e1;
+            background-clip: padding-box;
         }
         
         .resizer {
             position: absolute; right: 0; top: 0; width: 5px; height: 100%;
-            cursor: col-resize; user-select: none; z-index: 11;
+            cursor: col-resize; user-select: none; z-index: 21;
         }
         .resizer:hover, .resizing { border-right: 2px solid var(--primary-blue); background: rgba(41, 126, 198, 0.1); }
 
@@ -135,6 +125,22 @@
         .chk-box { cursor: pointer; width: 16px; height: 16px; accent-color: var(--primary-blue); }
         .col-print-chk { cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary-blue); flex-shrink: 0; }
         .header-sort:hover { color: var(--primary-blue); }
+        
+        /* Tombol Sembunyikan/Hide Kolom */
+        .btn-hide-col {
+            background: #ef4444; color: white; border: none; padding: 2px 6px; border-radius: 4px;
+            font-size: 10px; cursor: pointer; font-weight: 600; transition: 0.2s;
+        }
+        .btn-hide-col:hover { background: #dc2626; }
+
+        /* Panel untuk memunculkan kembali kolom yang di-hide */
+        .hidden-cols-bar {
+            padding: 8px 20px; background: #e2e8f0; font-size: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; display: none;
+        }
+        .unhide-pill {
+            background: #ffffff; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--primary-blue);
+        }
+        .unhide-pill:hover { background: var(--primary-blue); color: white; }
     </style>
 </head>
 <body>
@@ -152,14 +158,25 @@
 
     <!-- 2. TOOLBAR FILTERING & PRINT -->
     <div class="toolbar" id="toolbar" style="display: none;">
+        <!-- Pilihan Opsi Jenis Filter -->
         <div class="filter-group">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Cari data di semua kolom..." oninput="terapkanFilter()">
+            <label>Mode Filter:</label>
+            <select id="filterMode" onchange="gantiModeFilter()">
+                <option value="global">Cari Teks Bebas</option>
+                <option value="dateRange">Rentang Tanggal</option>
+            </select>
         </div>
-        <div class="filter-group" style="border-left: 1px solid #e2e8f0; padding-left: 15px;">
+
+        <!-- Input Berdasarkan Mode -->
+        <div class="filter-group" id="groupSearch">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Ketik kata kunci..." oninput="terapkanFilter()">
+        </div>
+
+        <div class="filter-group" id="groupDateStart" style="display: none;">
             <label>Mulai:</label>
             <input type="date" id="dateStart" onchange="terapkanFilter()">
         </div>
-        <div class="filter-group">
+        <div class="filter-group" id="groupDateEnd" style="display: none;">
             <label>Akhir:</label>
             <input type="date" id="dateEnd" onchange="terapkanFilter()">
         </div>
@@ -167,6 +184,12 @@
         <span id="rowCount" style="font-size: 13px; font-weight:600; color: #475569; margin-left: 15px; background: #eaf3fa; color: var(--primary-blue); padding: 6px 12px; border-radius: 20px;"></span>
         
         <button class="btn-print" onclick="cetakData()">🖨️ Cetak Terpilih</button>
+    </div>
+
+    <!-- Panel Kotak untuk Memunculkan Kolom yang di-Hide -->
+    <div class="hidden-cols-bar" id="hiddenColsBar">
+        <span style="font-weight: 600; color: #475569;">Kolom disembunyikan:</span>
+        <div id="hiddenColsList" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
     </div>
 
     <!-- 3. AREA TABEL DATA -->
@@ -178,8 +201,7 @@
     </div>
 
 <script>
-    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
-    const URL_API = "https://script.google.com/macros/s/AKfycbyLNZvX8XntHCspweBiMG5wJIFVtQ0HtekMRtz9TpCf37Fha-EJoKKnue1aFRpHbPb1/exec";
+    const URL_API = "https://script.google.com/macros/s/AKfycbzIQoBdSSOEr2E4Lu46uM9N9_FETgTdavBXO1ZH0vqqUW7P7X_01bZpDr3fSoE10e-c/exec";
 
     let globalHeaders = [];
     let globalRows = [];
@@ -187,6 +209,7 @@
     
     let currentSortCol = -1;
     let currentSortAsc = true;
+    let hiddenColumns = new Set(); // Menyimpan index kolom yang di-hide
 
     async function tarikData(sourceName, elemenDiklik) {
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -197,12 +220,14 @@
         const toolbar = document.getElementById("toolbar");
         
         toolbar.style.display = "none";
+        document.getElementById('hiddenColsBar').style.display = "none";
         tableContainer.innerHTML = `<div class="status-msg"><div class="spinner"></div><span>Sinkronisasi data ${sourceName}...</span></div>`;
 
         document.getElementById('searchInput').value = '';
         document.getElementById('dateStart').value = '';
         document.getElementById('dateEnd').value = '';
         currentSortCol = -1;
+        hiddenColumns.clear();
 
         try {
             let res = await fetch(`${URL_API}?source=${encodeURIComponent(sourceName)}`);
@@ -230,76 +255,77 @@
         }
     }
 
-    // ==========================================
-    // FUNGSI CERDAS FORMAT TANGGAL & JAM (FIX 1899)
-    // ==========================================
-    function formatCellData(headerName, rawValue) {
-        if (rawValue === undefined || rawValue === null || rawValue === '') return '';
-        
-        let headerLower = String(headerName).toLowerCase();
-        let strVal = String(rawValue);
+    function gantiModeFilter() {
+        let mode = document.getElementById('filterMode').value;
+        let sBox = document.getElementById('groupSearch');
+        let dStart = document.getElementById('groupDateStart');
+        let dEnd = document.getElementById('groupDateEnd');
 
-        // Deteksi apakah ini kolom waktu/jam (mengandung kata "waktu" atau "jam")
-        let isTimeColumn = headerLower.includes('waktu') || headerLower.includes('jam');
-        // Deteksi apakah ini kolom tanggal (mengandung kata "tanggal")
-        let isDateColumn = headerLower.includes('tanggal');
-
-        // Cek apakah data mentah berbentuk format ISO Date dari Google Sheet/Forms
-        let isIsoDate = strVal.match(/^\d{4}-\d{2}-\d{2}T/);
-
-        if (isIsoDate) {
-            let dateObj = new Date(strVal);
-            if (!isNaN(dateObj.getTime())) {
-                // Jika kolomnya khusus Jam (biasanya Google Sheets set tanggal default ke 1899-12-30)
-                if (isTimeColumn) {
-                    let hours = String(dateObj.getHours()).padStart(2, '0');
-                    let minutes = String(dateObj.getMinutes()).padStart(2, '0');
-                    return `${hours}.${minutes}`;
-                }
-                
-                // Jika kolomnya khusus Tanggal (tampilkan tanggal bulan tahun saja, tanpa jam 00.00)
-                if (isDateColumn) {
-                    return dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-                }
-
-                // Default timestamp lengkap jika bukan keduanya
-                return dateObj.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
-            }
+        if (mode === 'global') {
+            sBox.style.display = "flex";
+            dStart.style.display = "none";
+            dEnd.style.display = "none";
+            document.getElementById('dateStart').value = '';
+            document.getElementById('dateEnd').value = '';
+        } else {
+            sBox.style.display = "none";
+            dStart.style.display = "flex";
+            dEnd.style.display = "flex";
+            document.getElementById('searchInput').value = '';
         }
+        terapkanFilter();
+    }
 
-        // Handle khusus jika data string mentah dari sheet mengandung "1899-12-30" (Format waktu bawaan G-Form)
-        if (isTimeColumn && strVal.includes('1899')) {
-            let parts = strVal.split(',');
-            if (parts.length > 1) {
-                return parts[1].trim(); // Ambil bagian jamnya saja
-            }
-            let timeMatch = strVal.match(/\d{2}:\d{2}/);
-            if (timeMatch) return timeMatch[0].replace(':', '.');
-        }
+    function hideColumn(index) {
+        hiddenColumns.add(index);
+        renderTabel(globalHeaders, globalRows);
+    }
 
-        return strVal;
+    function showColumn(index) {
+        hiddenColumns.delete(index);
+        renderTabel(globalHeaders, globalRows);
     }
 
     function renderTabel(headers, barisData) {
         const tableContainer = document.getElementById("tableContainer");
+        const hiddenBar = document.getElementById('hiddenColsBar');
+        const hiddenList = document.getElementById('hiddenColsList');
         
+        // Render bar informasi kolom yang disembunyikan
+        if (hiddenColumns.size > 0) {
+            hiddenBar.style.display = "flex";
+            let pillsHtml = "";
+            hiddenColumns.forEach(idx => {
+                pillsHtml += `<span class="unhide-pill" onclick="showColumn(${idx})">➕ ${headers[idx]}</span>`;
+            });
+            hiddenList.innerHTML = pillsHtml;
+        } else {
+            hiddenBar.style.display = "none";
+        }
+
         let html = `<table><thead><tr>`;
         
-        // Header Checkbox Master
+        // Header Checkbox Master Baris
         html += `<th style="width: 40px; text-align: center;">
                     <div style="margin-bottom: 6px;">Cetak</div>
                     <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)" title="Pilih Semua Baris">
                  </th>`;
         
-        // Header Kolom + Fitur Sort + Checkbox Print Kolom
+        // Header Kolom + Tombol Hide & Sort
         headers.forEach((header, index) => { 
-            html += `<th>
+            let isHidden = hiddenColumns.has(index);
+            let displayStyle = isHidden ? "display: none;" : "";
+
+            html += `<th style="${displayStyle}" data-colindex="${index}">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
                             <div class="cell-content header-sort" style="-webkit-line-clamp: 2; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-grow: 1;" title="Klik untuk mengurutkan data" onclick="sortTable(${index}, this)">
                                 ${header} 
                                 <span class="sort-icon" style="color:#94a3b8; font-size:10px; flex-shrink: 0;">⇅</span>
                             </div>
-                            <input type="checkbox" class="col-print-chk" data-colindex="${index}" checked title="Centang agar kolom ini ikut di-print">
+                            <div style="display: flex; gap: 4px; align-items: center;">
+                                <button class="btn-hide-col" onclick="hideColumn(${index})" title="Sembunyikan Kolom Ini">Hide</button>
+                                <input type="checkbox" class="col-print-chk" data-colindex="${index}" checked title="Centang agar kolom ini ikut di-print">
+                            </div>
                         </div>
                         <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter..." oninput="terapkanFilter()">
                      </th>`; 
@@ -310,23 +336,20 @@
         barisData.forEach((row, originalIndex) => {
             html += `<tr id="row_${originalIndex}">`;
             
-            // Checkbox Baris
             html += `<td style="text-align: center;">
                         <input type="checkbox" class="chk-box row-chk" onchange="highlightRow(this)">
                      </td>`;
                      
             row.forEach((cell, colIndex) => {
+                let isHidden = hiddenColumns.has(colIndex);
+                let displayStyle = isHidden ? "display: none;" : "";
                 let rawCell = cell !== undefined && cell !== null ? cell : '';
-                let headerName = headers[colIndex];
                 
-                // Cek URL Berkas
                 if (typeof rawCell === 'string' && (rawCell.startsWith('http://') || rawCell.startsWith('https://'))) {
                     let formattedCell = `<a href="${rawCell}" target="_blank" class="btn-link">Buka Berkas ↗</a>`;
-                    html += `<td><div class="cell-content" title="${rawCell}">${formattedCell}</div></td>`;
+                    html += `<td style="${displayStyle}" data-colindex="${colIndex}"><div class="cell-content" title="${rawCell}">${formattedCell}</div></td>`;
                 } else {
-                    // Gunakan fungsi pembersih format tanggal & jam
-                    let cleanVal = formatCellData(headerName, rawCell);
-                    html += `<td><div class="cell-content" title="${String(cleanVal).replace(/<[^>]*>?/gm, '')}">${cleanVal}</div></td>`;
+                    html += `<td style="${displayStyle}" data-colindex="${colIndex}"><div class="cell-content" title="${String(rawCell).replace(/<[^>]*>?/gm, '')}">${rawCell}</div></td>`;
                 }
             });
             html += `</tr>`;
@@ -336,11 +359,9 @@
         tableContainer.innerHTML = html;
 
         initResizableColumns();
+        terapkanFilter(); // Pertahankan filter aktif saat render ulang
     }
 
-    // ==========================================
-    // SCRIPT SORTING
-    // ==========================================
     function sortTable(colIndex, headerElement) {
         const tbody = document.getElementById('tabelBody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -381,15 +402,12 @@
         rows.forEach(row => tbody.appendChild(row));
     }
 
-    // ==========================================
-    // RESIZABLE COLUMNS
-    // ==========================================
     function initResizableColumns() {
         const table = document.querySelector('table');
         const cols = document.querySelectorAll('th');
         
         cols.forEach(col => {
-            col.style.width = `${col.offsetWidth}px`;
+            if(!col.style.width) col.style.width = `${col.offsetWidth}px`;
         });
         
         table.style.tableLayout = 'fixed';
@@ -397,6 +415,7 @@
         table.style.minWidth = '100%';
 
         cols.forEach(col => {
+            if(col.querySelector('.resizer')) return; // Hindai duplikat resizer
             const resizer = document.createElement('div');
             resizer.classList.add('resizer');
             col.appendChild(resizer);
@@ -451,6 +470,7 @@
     }
 
     function terapkanFilter() {
+        let filterMode = document.getElementById('filterMode').value;
         let globalCari = document.getElementById('searchInput').value.toLowerCase();
         let dateStart = document.getElementById('dateStart').value;
         let dateEnd = document.getElementById('dateEnd').value;
@@ -471,14 +491,16 @@
             let rowData = globalRows[index];
             let teksBaris = rowData.join(" ").toLowerCase();
             
-            let lolosGlobal = teksBaris.includes(globalCari);
-
-            let lolosTgl = true;
-            if (dStart || dEnd) {
-                let cellTanggal = new Date(rowData[0]); 
-                if (!isNaN(cellTanggal.getTime())) {
-                    if (dStart && cellTanggal < dStart) lolosTgl = false;
-                    if (dEnd && cellTanggal > dEnd) lolosTgl = false;
+            let lolosGlobal = true;
+            if (filterMode === 'global') {
+                lolosGlobal = teksBaris.includes(globalCari);
+            } else {
+                if (dStart || dEnd) {
+                    let cellTanggal = new Date(rowData[0]); 
+                    if (!isNaN(cellTanggal.getTime())) {
+                        if (dStart && cellTanggal < dStart) lolosGlobal = false;
+                        if (dEnd && cellTanggal > dEnd) lolosGlobal = false;
+                    }
                 }
             }
 
@@ -491,7 +513,7 @@
                 }
             }
 
-            if (lolosGlobal && lolosTgl && lolosCol) {
+            if (lolosGlobal && lolosCol) {
                 tr.style.display = "";
                 countVisible++;
             } else {
@@ -505,7 +527,8 @@
         });
         
         document.getElementById('rowCount').innerText = `${countVisible} Baris Data`;
-        document.getElementById('chkAll').checked = false;
+        let chkAll = document.getElementById('chkAll');
+        if(chkAll) chkAll.checked = false;
     }
 
     function cetakData() {
@@ -514,10 +537,10 @@
             return alert("Pilih minimal satu baris data untuk dicetak.");
         }
 
-        let checkedCols = Array.from(document.querySelectorAll('.col-print-chk:checked')).map(chk => parseInt(chk.getAttribute('data-colindex')));
+        let checkedCols = Array.from(document.querySelectorAll('.col-print-chk:checked')).map(chk => parseInt(chk.getAttribute('data-colindex'))).filter(idx => !hiddenColumns.has(idx));
         
         if (checkedCols.length === 0) {
-            return alert("Pilih minimal satu kolom untuk dicetak melalui checkbox di header tabel.");
+            return alert("Pilih minimal satu kolom yang aktif untuk dicetak.");
         }
 
         let printWindow = window.open('', '_blank');
@@ -554,9 +577,9 @@
             printHtml += `<tr>`;
             
             checkedCols.forEach(colIndex => {
-                let td = tr.cells[colIndex + 1]; 
-                let cellDiv = td.querySelector('.cell-content');
-                let cellContent = cellDiv ? cellDiv.innerHTML : td.innerHTML;
+                let td = tr.querySelector(`td[data-colindex="${colIndex}"]`);
+                let cellDiv = td ? td.querySelector('.cell-content') : null;
+                let cellContent = cellDiv ? cellDiv.innerHTML : (td ? td.innerHTML : '');
 
                 if(cellContent.includes('<a href=')) {
                     let hrefMatch = cellContent.match(/href="([^"]*)"/);

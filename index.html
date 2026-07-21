@@ -10,15 +10,22 @@
            ========================================= */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
+        :root {
+            --primary-blue: #297ec6;
+            --primary-yellow: #ffde17;
+            --bg-color: #f4f7f9;
+            --text-main: #1e293b;
+        }
+        
         body, html { 
             margin: 0; padding: 0; height: 100%; 
             font-family: 'Inter', 'Segoe UI', sans-serif; 
-            background: #f1f5f9; color: #1e293b; overflow: hidden; 
+            background: var(--bg-color); color: var(--text-main); overflow: hidden; 
             display: flex; flex-direction: column;
         }
 
         ::-webkit-scrollbar { width: 8px; height: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
@@ -29,20 +36,23 @@
             background: #ffffff; border-bottom: 1px solid #e2e8f0;
             padding: 12px 20px; display: flex; gap: 10px;
             overflow-x: auto; white-space: nowrap;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04); flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05); flex-shrink: 0;
             align-items: center;
         }
         .brand-title {
-            font-weight: 700; font-size: 15px; color: #0f172a; 
+            font-weight: 700; font-size: 15px; color: var(--primary-blue); 
             margin-right: 20px; border-right: 2px solid #e2e8f0; padding-right: 20px;
+            letter-spacing: 0.5px;
         }
         .nav-btn {
             background: #ffffff; border: 1px solid #e2e8f0; padding: 8px 14px;
             border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
             color: #475569; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
         }
-        .nav-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
-        .nav-btn.active { background: #2563eb; color: #ffffff; border-color: #2563eb; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+        /* Hover menggunakan warna kuning */
+        .nav-btn:hover { background: #fffdf0; border-color: var(--primary-yellow); color: var(--text-main); }
+        /* Aktif menggunakan warna biru */
+        .nav-btn.active { background: var(--primary-blue); color: #ffffff; border-color: var(--primary-blue); box-shadow: 0 2px 4px rgba(41, 126, 198, 0.2); }
 
         /* =========================================
            3. TOOLBAR FILTERING & PRINT
@@ -54,17 +64,19 @@
         .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #475569; }
         .toolbar input[type="text"], .toolbar input[type="date"] {
             padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
-            font-size: 13px; outline: none; transition: 0.2s; color: #0f172a;
+            font-size: 13px; outline: none; transition: 0.2s; color: var(--text-main);
         }
-        .toolbar input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .toolbar input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(41, 126, 198, 0.15); }
         .search-box { flex-grow: 1; max-width: 350px; }
         
+        /* Tombol Print menggunakan warna kuning agar mencolok */
         .btn-print {
-            background: #10b981; color: #ffffff; border: none; padding: 8px 16px;
-            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+            background: var(--primary-yellow); color: var(--text-main); border: none; padding: 8px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700;
             margin-left: auto; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(255, 222, 23, 0.3);
         }
-        .btn-print:hover { background: #059669; box-shadow: 0 2px 4px rgba(16,185,129,0.2); }
+        .btn-print:hover { background: #e5c714; box-shadow: 0 2px 6px rgba(255, 222, 23, 0.5); transform: translateY(-1px); }
 
         /* =========================================
            4. DATA TABLE AREA (EXCEL LIKE)
@@ -79,14 +91,14 @@
             font-size: 13px; text-align: left; vertical-align: top;
         }
         
-        /* PERBAIKAN: Smart Text Wrap + Line Clamp (Maksimal 4 baris) */
+        /* Smart Text Wrap + Line Clamp (Maksimal 4 baris) */
         .cell-content {
             white-space: normal;
             word-wrap: break-word;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
-            -webkit-line-clamp: 4; /* Batas maksimal baris biar tidak gepeng */
+            -webkit-line-clamp: 4; 
             -webkit-box-orient: vertical;
         }
 
@@ -96,38 +108,41 @@
             position: relative; position: sticky; background-clip: padding-box;
         }
         
+        /* Handler untuk Resize Kolom (Biru saat disentuh) */
         .resizer {
             position: absolute; right: 0; top: 0; width: 5px; height: 100%;
             cursor: col-resize; user-select: none; z-index: 11;
         }
-        .resizer:hover, .resizing { border-right: 2px solid #2563eb; background: rgba(37,99,235,0.1); }
+        .resizer:hover, .resizing { border-right: 2px solid var(--primary-blue); background: rgba(41, 126, 198, 0.1); }
 
         .col-filter-input {
             width: 100%; box-sizing: border-box; padding: 6px; margin-top: 8px;
             border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;
-            font-weight: normal; outline: none; background: #ffffff;
+            font-weight: normal; outline: none; background: #ffffff; transition: 0.2s;
         }
-        .col-filter-input:focus { border-color: #2563eb; }
+        .col-filter-input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 2px rgba(41, 126, 198, 0.15); }
         
-        tr:hover td { background-color: #f1f5f9; }
-        tr.selected td { background-color: #eff6ff; }
+        tr:hover td { background-color: #f4f9fd; }
+        tr.selected td { background-color: #eaf3fa; }
         td:first-child, th:first-child { border-left: 1px solid #e2e8f0; }
 
         .btn-link {
-            display: inline-block; background: #0ea5e9; color: #ffffff; padding: 4px 10px;
+            display: inline-block; background: var(--primary-blue); color: #ffffff; padding: 4px 10px;
             border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s;
         }
-        .btn-link:hover { background: #0284c7; }
+        .btn-link:hover { background: var(--primary-yellow); color: var(--text-main); }
 
         .status-msg { padding: 40px 20px; text-align: center; color: #64748b; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; height: 100%; }
         
-        .spinner { width: 30px; height: 30px; border: 3px solid #f1f5f9; border-top: 3px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner { width: 30px; height: 30px; border: 3px solid #f1f5f9; border-top: 3px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .chk-box { cursor: pointer; width: 16px; height: 16px; accent-color: #2563eb; }
+        /* Aksent checkbox warna biru */
+        .chk-box { cursor: pointer; width: 16px; height: 16px; accent-color: var(--primary-blue); }
+        .col-print-chk { cursor: pointer; width: 14px; height: 14px; accent-color: var(--primary-blue); flex-shrink: 0; }
         
-        /* Styling khusus untuk checkbox di header (print col selection) */
-        .col-print-chk { cursor: pointer; width: 14px; height: 14px; accent-color: #10b981; flex-shrink: 0; }
+        /* Hover state untuk area header yg bisa di-klik */
+        .header-sort:hover { color: var(--primary-blue); }
     </style>
 </head>
 <body>
@@ -157,7 +172,7 @@
             <input type="date" id="dateEnd" onchange="terapkanFilter()">
         </div>
         
-        <span id="rowCount" style="font-size: 13px; font-weight:600; color: #475569; margin-left: 15px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px;"></span>
+        <span id="rowCount" style="font-size: 13px; font-weight:600; color: #475569; margin-left: 15px; background: #eaf3fa; color: var(--primary-blue); padding: 6px 12px; border-radius: 20px;"></span>
         
         <button class="btn-print" onclick="cetakData()">🖨️ Cetak Terpilih</button>
     </div>
@@ -177,6 +192,10 @@
     let globalHeaders = [];
     let globalRows = [];
     let currentModule = "";
+    
+    // Variabel state untuk fitur Sort
+    let currentSortCol = -1;
+    let currentSortAsc = true;
 
     async function tarikData(sourceName, elemenDiklik) {
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -192,6 +211,7 @@
         document.getElementById('searchInput').value = '';
         document.getElementById('dateStart').value = '';
         document.getElementById('dateEnd').value = '';
+        currentSortCol = -1; // Reset sort saat pindah menu
 
         try {
             let res = await fetch(`${URL_API}?source=${encodeURIComponent(sourceName)}`);
@@ -230,11 +250,14 @@
                     <input type="checkbox" id="chkAll" class="chk-box" onchange="toggleCheckAll(this)" title="Pilih Semua Baris">
                  </th>`;
         
-        // Header Kolom + Input Filter + Checkbox Print Kolom
+        // Header Kolom + Fitur Sort + Checkbox Print Kolom
         headers.forEach((header, index) => { 
             html += `<th>
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-                            <div class="cell-content" style="-webkit-line-clamp: 2;" title="${header}">${header}</div>
+                            <div class="cell-content header-sort" style="-webkit-line-clamp: 2; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-grow: 1;" title="Klik untuk mengurutkan data" onclick="sortTable(${index}, this)">
+                                ${header} 
+                                <span class="sort-icon" style="color:#94a3b8; font-size:10px; flex-shrink: 0;">⇅</span>
+                            </div>
                             <input type="checkbox" class="col-print-chk" data-colindex="${index}" checked title="Centang agar kolom ini ikut di-print">
                         </div>
                         <input type="text" class="col-filter-input" data-colindex="${index}" placeholder="Filter..." oninput="terapkanFilter()">
@@ -275,6 +298,59 @@
     }
 
     // ==========================================
+    // SCRIPT KHUSUS SORTING (MENDUKUNG ANGKA, TEKS & TANGGAL)
+    // ==========================================
+    function sortTable(colIndex, headerElement) {
+        const tbody = document.getElementById('tabelBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        // Cek arah pengurutan
+        if (currentSortCol === colIndex) {
+            currentSortAsc = !currentSortAsc;
+        } else {
+            currentSortCol = colIndex;
+            currentSortAsc = true;
+            // Reset semua ikon panah di kolom lain
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.innerHTML = '⇅';
+                icon.style.color = '#94a3b8';
+            });
+        }
+
+        // Update ikon panah di kolom yang sedang aktif (Biru)
+        const currentIcon = headerElement.querySelector('.sort-icon');
+        currentIcon.innerHTML = currentSortAsc ? '▲' : '▼';
+        currentIcon.style.color = 'var(--primary-blue)';
+
+        // Proses pengurutan array baris
+        rows.sort((a, b) => {
+            // Index + 1 karena sel pertama (index 0) adalah checkbox cetak
+            let valA = a.cells[colIndex + 1].innerText.trim();
+            let valB = b.cells[colIndex + 1].innerText.trim();
+
+            // Pengecekan cerdas apakah isi data adalah Tanggal yang valid
+            let dA = new Date(valA);
+            let dB = new Date(valB);
+            let isDate = (dA.toString() !== 'Invalid Date' && dB.toString() !== 'Invalid Date' && valA.length > 6 && valB.length > 6 && isNaN(valA));
+
+            let comparison = 0;
+
+            if (isDate) {
+                // Urutkan berdasarkan waktu/tanggal
+                comparison = dA.getTime() - dB.getTime();
+            } else {
+                // Urutkan otomatis berdasarkan Angka (Numeric) atau Teks (Alphabet)
+                comparison = valA.localeCompare(valB, 'id', { numeric: true, sensitivity: 'base' });
+            }
+
+            return currentSortAsc ? comparison : -comparison;
+        });
+
+        // Terapkan hasil urutan kembali ke tabel (DOM)
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // ==========================================
     // SCRIPT KHUSUS RESIZABLE COLUMNS
     // ==========================================
     function initResizableColumns() {
@@ -311,7 +387,6 @@
                 const dx = e.clientX - x;
                 let newWidth = w + dx;
                 
-                // Batas minimal lebar kolom (100px) agar checkbox dan filter tidak tertimpa/hilang
                 if (newWidth < 100) newWidth = 100; 
 
                 col.style.width = `${newWidth}px`;
@@ -416,11 +491,10 @@
             return alert("Pilih minimal satu baris data untuk dicetak.");
         }
 
-        // Ambil index kolom mana saja yang dicentang oleh user di header
         let checkedCols = Array.from(document.querySelectorAll('.col-print-chk:checked')).map(chk => parseInt(chk.getAttribute('data-colindex')));
         
         if (checkedCols.length === 0) {
-            return alert("Pilih minimal satu kolom untuk dicetak melalui checkbox hijau di header tabel.");
+            return alert("Pilih minimal satu kolom untuk dicetak melalui checkbox di header tabel.");
         }
 
         let printWindow = window.open('', '_blank');
@@ -447,27 +521,24 @@
                     <thead><tr>
         `;
 
-        // Render Header yang dicentang saja
         checkedCols.forEach(colIndex => {
             printHtml += `<th>${globalHeaders[colIndex]}</th>`;
         });
         printHtml += `</tr></thead><tbody>`;
 
-        // Render Baris Data
         checkedBoxes.forEach(chk => {
             let tr = chk.closest('tr');
             printHtml += `<tr>`;
             
             checkedCols.forEach(colIndex => {
-                // Ekstrak isi dari .cell-content agar saat diprint tampil utuh tanpa terpotong
-                let td = tr.cells[colIndex + 1]; // +1 karena kolom index 0 di tabel HTML adalah kolom Master Checkbox baris
+                let td = tr.cells[colIndex + 1]; 
                 let cellDiv = td.querySelector('.cell-content');
                 let cellContent = cellDiv ? cellDiv.innerHTML : td.innerHTML;
 
                 if(cellContent.includes('<a href=')) {
                     let hrefMatch = cellContent.match(/href="([^"]*)"/);
                     if(hrefMatch && hrefMatch[1]) {
-                        cellContent = `<span style="word-break: break-all; color: #2563eb; text-decoration: underline;">${hrefMatch[1]}</span>`;
+                        cellContent = `<span style="word-break: break-all; color: #297ec6; text-decoration: underline;">${hrefMatch[1]}</span>`;
                     }
                 }
                 printHtml += `<td>${cellContent}</td>`;
